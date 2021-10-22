@@ -7,26 +7,49 @@ class ETL:
 
     @staticmethod
     def read_csv_into_sqlite(input_file):
-
-        #Read csv file
+        # Read csv file
         data = pd.read_csv(input_file, chunksize=100000, iterator=True, dtype={"phone_number": str})
 
-        #Create Sqlite database
+        # Create Sqlite database
         csv_database = sqlalchemy.create_engine(f'sqlite:///{input_file.split(".")[0]}.db')
 
-        #Insert data in sqlite database
+        # Insert data in sqlite database
         for df in data:
             df.to_sql('my_data', csv_database, if_exists='append', index=False)
 
 
     @staticmethod
-    def read_mssql_into_sqlite():
-        pass
+    def read_mssql_into_sqlite(db_name="Users", server_name="MOSA"):
+        mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server_name}/{db_name}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
+        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{db_name}_my_data.db')
+
+        table = mssql_engine.execute("SELECT * FROM my_data;")
+        df = pd.DataFrame(table, columns=table.keys())
+        df.to_sql('my_data', sqlite_engine, index=False)
+
+
+    @staticmethod
+    def make_query(db_name):
+        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{db_name}')
+        while(True):
+            query = input("write your query or 'q' to quit: ")
+            if (query == "q"):
+                break
+
+            try:
+                result = sqlite_engine.execute(query)
+                print(",".join(result.keys()))
+                for row in result.fetchall():
+                    row = [str(i) for i in list(row)]
+                    print(",".join(row))
+            except Exception as e:
+                print(e)
+                print("Error with your query.")
+
 
     @staticmethod
     def read_csv_into_mssql(input_file, user_name="", password="", db_name="Users", server_name="MOSA"):
         csv_data = pd.read_csv(input_file, chunksize=100000, iterator=True, dtype={"phone_number": str})
-        # engine = sqlalchemy.create_engine(f'mssql+pyodbc://{user_name}:{password}@{server_name}/{db_name}')
         engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server_name}/{db_name}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
 
 
