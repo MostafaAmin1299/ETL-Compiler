@@ -1,9 +1,6 @@
-from numpy.core.numeric import ones
 import pandas as pd
 import random
 import datetime
-import numpy as np
-from pandas.core import indexing
 import sqlalchemy
 
 class ETL:
@@ -56,5 +53,3 @@ class ETL:
         
         df.to_csv(file_name + ".csv.zip", index_label='id', compression='zip')
         
-
-ETL.read_csv_into_sqlite('random_data_1000000.csv.zip')
