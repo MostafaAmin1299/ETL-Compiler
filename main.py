@@ -8,16 +8,30 @@ class ETL:
     @staticmethod
     def read_csv_into_sqlite(input_file):
 
-        #Rrad csv file
-        data = pd.read_csv(input_file, chunksize=100000, iterator=True, dtype = {"phone_number": str})
+        #Read csv file
+        data = pd.read_csv(input_file, chunksize=100000, iterator=True, dtype={"phone_number": str})
 
         #Create Sqlite database
         csv_database = sqlalchemy.create_engine(f'sqlite:///{input_file.split(".")[0]}.db')
 
         #Insert data in sqlite database
         for df in data:
-            df.to_sql('my_data', csv_database, if_exists='append', index = False)
+            df.to_sql('my_data', csv_database, if_exists='append', index=False)
 
+
+    @staticmethod
+    def read_mssql_into_sqlite():
+        pass
+
+    @staticmethod
+    def read_csv_into_mssql(input_file, user_name="", password="", db_name="Users", server_name="MOSA"):
+        csv_data = pd.read_csv(input_file, chunksize=100000, iterator=True, dtype={"phone_number": str})
+        # engine = sqlalchemy.create_engine(f'mssql+pyodbc://{user_name}:{password}@{server_name}/{db_name}')
+        engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server_name}/{db_name}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
+
+
+        for df in csv_data:
+            df.to_sql('my_data', engine, if_exists='append', index=False)
 
 
     @staticmethod
