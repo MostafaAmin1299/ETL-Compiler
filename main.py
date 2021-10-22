@@ -3,17 +3,28 @@ import pandas as pd
 import random
 import datetime
 import numpy as np
-from sqlalchemy import create_engine
+from pandas.core import indexing
+import sqlalchemy
 
 class ETL:
 
     @staticmethod
-    def read_csv():
-        pass
+    def read_csv_into_sqlite(input_file):
+
+        #Rrad csv file
+        data = pd.read_csv(input_file, chunksize=100000, iterator=True, dtype = {"phone_number": str})
+
+        #Create Sqlite database
+        csv_database = sqlalchemy.create_engine(f'sqlite:///{input_file.split(".")[0]}.db')
+
+        #Insert data in sqlite database
+        for df in data:
+            df.to_sql('my_data', csv_database, if_exists='append', index = False)
+
+
 
     @staticmethod
-    def create_random_csv():
-        N = 400
+    def create_random_csv(file_name, N):
         df = pd.DataFrame()
 
         # Generate random names column
@@ -41,9 +52,9 @@ class ETL:
 
         # Generate random city column
         cities = ('Suez', 'Ismailia', 'Cairo', 'Sadr', 'Alex', 'Giza')
-        df['city'] = random.choices(cities, weights=[10].append(ones(5, dtype=int)), k=N)
+        df['city'] = random.choices(cities, weights=[10, 2, 2, 1, 1, 1], k=N)
         
-        df.to_csv('random_data.csv', index_label='id')
+        df.to_csv(file_name + ".csv.zip", index_label='id', compression='zip')
         
 
-ETL.create_random_csv()
+ETL.read_csv_into_sqlite('random_data_1000000.csv.zip')
