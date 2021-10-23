@@ -6,7 +6,7 @@ import sqlalchemy
 class ETL:
 
     @staticmethod
-    def csv_to_sqlite(csv_file_path, colums_data_types={}, sqlite_db_file_path=None, table_name="csv_data"):
+    def csv_to_sqlite(csv_file_path, columns_data_types={}, sqlite_db_file_path=None, table_name="csv_data"):
         """A function that opens and reads a csv file and copies its data into an sqlite database (given or created)."""
 
         if sqlite_db_file_path == None:
@@ -14,7 +14,7 @@ class ETL:
 
         try:
             # Read csv file into a TextFileReader
-            csv_data = pd.read_csv(csv_file_path, chunksize=100000, iterator=True, dtype=colums_data_types)
+            csv_data = pd.read_csv(csv_file_path, chunksize=100000, iterator=True, dtype=columns_data_types)
 
             sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{db_file_path}')
 
