@@ -1,7 +1,7 @@
 import ply.lex as lex
 from ply.lex import TOKEN
 
-class MyLexer(object):
+class MyLexer():
     # To handle reserved words
     reserved = {
     'select':   'SELECT',
@@ -66,9 +66,8 @@ class MyLexer(object):
         t.value = int(t.value)
         return t
 
-    # Define a rule so we can track line numbers
+    @TOKEN(r'\n+')
     def t_newline(self,t):
-        r'\n+'
         t.lexer.lineno += len(t.value)
 
     # Error handling rule
@@ -95,6 +94,7 @@ m = MyLexer()
 
 while(True):
     q = input("Enter Query (q to exit): ")
+    q = q.lower() 
     if q == 'q':
         break
     m.tokenize(q)
