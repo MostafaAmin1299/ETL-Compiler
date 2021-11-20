@@ -2,15 +2,19 @@ import ply.lex as lex
 from ply.lex import TOKEN
 
 class MyLexer():
+
+
+        
     # To handle reserved words
     reserved = {
     'select':   'SELECT',
     'from':     'FROM',
     'into':     'INTO',
     'where':    'WHERE',
+    'insert':   'INSERT'
     }
 
-    # List of token names.   This is always required
+    # List of token names.
     tokens = [
         'NUMBER',
         'PLUS',
@@ -26,6 +30,7 @@ class MyLexer():
         'SMALLER_THAN_OR_EQUAL_TO',
         'SMALLER_THAN',
         'SIMICOLON',
+        'STRING'
     ] + list(reserved.values())
 
     # Regular expression rules for simple tokens
@@ -40,15 +45,12 @@ class MyLexer():
     t_BIGGER_THAN               = r'>'
     t_SMALLER_THAN_OR_EQUAL_TO  = r'<='
     t_SMALLER_THAN              = r'<'
-    t_SELECT    = r'select'
-    t_FROM      = r'from'
-    t_INTO      = r'into'
-    t_WHERE     = r'where'
-    t_SIMICOLON = r';'
+    t_STRING = r'["]([^"\n]|\\(.|\n))*["]'
 
     # ignored characters 
     t_ignore  = ' \t'  # Spaces and tabs
     t_ignore_COMMENT = r'/\*.*\*/' # Comment
+
 
     # To define tokens as a series of more complex regular expression rules.
     digit            = r'([0-9])'
@@ -70,13 +72,15 @@ class MyLexer():
     def t_newline(self,t):
         t.lexer.lineno += len(t.value)
 
+
+    def __init__(self,**kwargs):
+        self.lexer = lex.lex(module=self, **kwargs)
+
     # Error handling rule
     def t_error(self,t):
         print(f"Illegal entity {t.value}")
         t.lexer.skip(1)
 
-    def __init__(self,**kwargs):
-        self.lexer = lex.lex(module=self, **kwargs)
 
     def tokenize(self,data):
         self.lexer.input(data)
@@ -89,7 +93,7 @@ class MyLexer():
         print('====================')
 
 
-# Build the lexer and try it out
+
 m = MyLexer()
 
 while(True):
