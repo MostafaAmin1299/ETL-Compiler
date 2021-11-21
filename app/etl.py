@@ -59,26 +59,21 @@ class ETL:
 
 
     @staticmethod
-    def make_query(sqlite_db_path):
+    def make_query(sqlite_db_path,query):
         """A function that execute a series of queries given by the user."""
 
         sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{sqlite_db_path}')
 
-        while(True):
-            query = input("write your query or 'q' to quit: ")
-            if (query == "q"):
-                break
+        try:
+            result = sqlite_engine.execute(query)
+            print(",".join(result.keys()))
+            for row in result.fetchall():
+                row = [str(i) for i in list(row)]
+                print(",".join(row))
 
-            try:
-                result = sqlite_engine.execute(query)
-                print(",".join(result.keys()))
-                for row in result.fetchall():
-                    row = [str(i) for i in list(row)]
-                    print(",".join(row))
-
-            except Exception as e:
-                print(e)
-                print("Couldn't execute query.")
+        except Exception as e:
+            print(e)
+            print("Couldn't execute query.")
 
 
     @staticmethod
