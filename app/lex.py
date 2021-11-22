@@ -50,10 +50,10 @@ tokens = [
     'DATASOURCE',
     'EQUAL',
     'NOTEQUAL',
-    'BIGGER_THAN_OR_EQUAL_TO',
-    'BIGGER_THAN',
-    'SMALLER_THAN_OR_EQUAL_TO',
-    'SMALLER_THAN',
+    'BIGGER_EQUAL',
+    'BIGGER',
+    'SMALLER_EQUAL',
+    'SMALLER',
     'SIMICOLON',
     'COMMA',
     'STRING',
@@ -68,12 +68,12 @@ t_DIVIDE    = r'/'
 t_PERCENT   = r'%'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
-t_EQUAL                     = r'='
-t_NOTEQUAL                  = r'<>'
-t_BIGGER_THAN_OR_EQUAL_TO   = r'>='
-t_BIGGER_THAN               = r'>'
-t_SMALLER_THAN_OR_EQUAL_TO  = r'<='
-t_SMALLER_THAN              = r'<'
+t_EQUAL         = r'='
+t_NOTEQUAL      = r'<>'
+t_BIGGER_EQUAL  = r'>='
+t_BIGGER        = r'>'
+t_SMALLER_EQUAL = r'<='
+t_SMALLER       = r'<'
 t_SIMICOLON = r';'
 t_COMMA     = r','
 t_DATASOURCE      = r'\[[^,\]\[]+\]'
@@ -109,24 +109,21 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-def tokenize(data, lexer):
-    lexer.input(data)
-    print('=======Tokens=======')
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break
-        print("\t", tok.value, "\t:\t", tok.type, sep="")
-    print('====================')
-
 
 # Build the lexer and try it out
 lexer = lex.lex()
 
 if __name__=='__main__':
     while(True):
-        q = input("Enter Query (q to exit): ")
-        q = q.lower() 
-        if q == 'q':
+        s = input("lex> ")
+        if not s:
             break
-        tokenize(q, lexer)
+        s = s.lower() 
+        lexer.input(s)
+        print('=======Tokens=======')
+        while True:
+            tok = lexer.token()
+            if not tok:
+                break
+            print("\t", tok.value, "\t:\t", tok.type, sep="")
+        print('====================')

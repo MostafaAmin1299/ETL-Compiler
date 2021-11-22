@@ -4,6 +4,18 @@ from etl import ETL
 
 
 start = 'select'
+def p_start(p):
+    'start : select | insert | update | delete'
+    pass
+
+def p_error(p):
+    print("Syntax error in input!", p)
+
+
+
+##########################
+#========= Maths =========
+##########################
 
 def p_expression_plus(p):
     'expression : expression PLUS term'
@@ -38,34 +50,79 @@ def p_factor_expr(p):
     p[0] = p[2]
 
 
-#=====BASIC VARIABLES=====
+##########################
+#==== BASIC VARIABLES ====
+##########################
 
-def p_where(p):
-    '''where : WHERE cond
-             | empty'''
-             
+def p_empty(p):
+    'empty :'
     p[0] = ''
 
-def p_cond(p):
-    '''cond : exp op exp
-            | exp BETWEEN exp AND exp
-            | exp IN tuple
-            | exp is
-            | exp LIKE STRING
-            | EXISTS LPAREN select RPAREN
-            | cond AND cond
-            | cond OR cond
-            | NOT cond
-            | LPAREN cond RPAREN'''
+
+def p_logical(p):
+    '''logical :  EQUAL 
+                | NOTEQUAL 
+                | BIGGER_EQUAL 
+                | BIGGER 
+                | SMALLER_EQUAL 
+                | SMALLER'''
     pass
 
-#=====BASIC VARIABLES (CONT.)​=====
+
+def p_where(p):
+    'where : WHERE cond'         
+    p[0] = p[2]
+
+def p_where_empty(p):
+    'where : empty'
+    p[0] = True
+
+
+def p_cond_parens(p):
+    'cond : LPAREN cond RPAREN'
+    p[0] = p[2]
+
+def p_cond_logical(p):
+    'cond : exp logical exp'
+    pass
+
+def p_cond_between(p):
+    'cond : exp BETWEEN exp AND exp'
+    pass
+
+def p_cond_in(p):
+    'cond : exp IN tuple'
+    pass
+
+def p_cond_is(p):
+    'cond: exp is'
+    pass
+
+def p_cond_like(p):
+    'cond : exp LIKE STRING'
+    pass
+
+def p_cond_exists(p):
+    'cond : EXISTS LPAREN select RPAREN'
+    pass
+
+def p_cond_and(p):
+    'cond : cond AND cond'
+    p[0] = p[1] and p[3]
+
+def p_cond_or(p):
+    'cond : cond OR cond'
+    p[0] = p[1] or p[3]
+
+def p_cond_not(p):
+    'cond : NOT cond'
+    p[0] = not p[2]
 
 def p_exp(p):
     '''exp : STRING
            | NUMBER
            | COLNAME
-           | exp aop exp''' 
+           | expression''' 
     pass
 
 def p_exps(p):
@@ -73,24 +130,8 @@ def p_exps(p):
             | exp COMMA exps'''
     pass
 
-def p_op(p):
-    '''op : EQUAL
-          | BIGGER_THAN
-          | SMALLER_THAN
-          | NOTEQUAL
-          | BIGGER_THAN_OR_EQUAL_TO
-          | SMALLER_THAN_OR_EQUAL_TO'''
-    pass
 
-def p_aop(p):
-    '''aop : PLUS
-           | MINUS
-           | TIMES
-           | DIVIDE
-           | PERCENT'''
-    pass
-
-def p_tuple (p):
+def p_tuple(p):
     '''tuple : select
              | exps
              | empty'''
@@ -101,17 +142,16 @@ def p_is(p):
           | IS NOT NULL'''
     pass
 
-def p_empty(p):
-    'empty :'
-    p[0] = ''
 
-#=====SELECT STATEMENT​​=====
+
+###########################
+#==== SELECT STATEMENT​​ ====
+###########################
 
 def p_select(p):
     'select : SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON'
 
     p[0] = f'{p[1]} {",".join(p[3])}{" ".join(p[4:6])} {p[6][1:-1].split(";")[1]} {" ".join(p[7:])}'
-
     ETL.make_query(p[6][1:-1].split(";")[0], p[0])
 
 
@@ -190,7 +230,11 @@ def p_limit(p):
              | empty'''
     p[0] = ''
 
-#=====INSERT STATEMENT​​=====
+
+
+###########################
+#==== INSERT STATEMENT​​ ====
+###########################
 
 def p_insert(p):
     '''insert : INSERT INTO DATASOURCE icolumn VALUES LPAREN value RPAREN SIMICOLON
@@ -208,7 +252,11 @@ def p_icolumn(p):
                | empty'''
     pass
 
-#=====UPDATE STATEMENT​​=====
+
+
+###########################
+#==== UPDATE STATEMENT​​ ====
+###########################
 
 def p_update(p):
     'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
@@ -219,27 +267,25 @@ def p_assigns(p):
                | assigns COMMA assigns'''
     pass
 
-#=====DELETE STATEMENT​​=====
 
+
+###########################
+#==== DELETE STATEMENT​​ ====
+###########################
 
 def p_delete(p):
     'delete : DELETE FROM DATASOURCE where'
     pass
 
 
-# Error rule for syntax errors
-def p_error(p):
-    print("Syntax error in input!", p)
-
-
-
 
 # Build the parser
 parser = yacc.yacc()
 
-while True:
-    s = input('yacc> ')
-    if not s: break
-    result = parser.parse(s)
-    print(result)
+if __name__=='__main__':
+    while True:
+        s = input('yacc> ')
+        if not s: break
+        result = parser.parse(s)
+        print(result)
     
