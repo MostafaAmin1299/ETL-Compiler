@@ -2,6 +2,7 @@ import pandas as pd
 import random
 import datetime
 import sqlalchemy
+import re
 
 class ETL():
     data:pd.DataFrame = None
@@ -14,6 +15,8 @@ class ETL():
             self.__extract_from_sqlite(data_source)
         elif source_type == 'MSSQL':
             self.__extract_from_mssql(data_source)
+        else:
+            return 'Data source name is wrong'
 
 
     def transform(self, criteria:dict):
@@ -27,7 +30,38 @@ class ETL():
             self.__load_to_sqlite(data_destination)
         elif source_type == 'MSSQL':
             self.__load_to_mssql(data_destination)
+        else:
+            return 'Data source name is wrong'
 
+
+
+    def __get_source_type(self, data_source:str):
+        csv = re.search('.*\.csv.*', data_source)
+        sqlite = re.search('.*\.db.*', data_source)
+        mssql = re.search('Data Source.*', data_source)
+
+        if csv:   
+            return 'CSV'
+        elif sqlite:
+            return 'SQLITE'
+        elif mssql:
+            return 'MSSQL'
+
+
+    def __extract_from_csv(self, data_source):
+        self.data = pd.read_csv(data_source, chunksize=100000, iterator=True)
+
+        
+    def __extract_from_sqlite(self, data_source):
+        data_source = data_source.split(';')
+        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{data_source[0]}')
+        self.data = pd.read_sql(f'select * from {data_source[1]}', sqlite_engine)
+
+
+etl = ETL()
+s = 'S:\\Faculty\\4-1\\Compiler\\Compiler\\random_data_1000000.db;my_data'
+etl.extract(s)
+etl.data.to_csv("test22.csv", index_label='id')
 
 
 
