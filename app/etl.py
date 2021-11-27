@@ -22,6 +22,7 @@ class ETL():
     def transform(self, criteria:dict):
         pass
 
+
     def load(self, data_destination:str):
         source_type = self.__get_source_type(data_destination)
         if source_type == 'CSV':
@@ -58,10 +59,25 @@ class ETL():
         self.data = pd.read_sql(f'select * from {data_source[1]}', sqlite_engine)
 
 
-etl = ETL()
-s = 'S:\\Faculty\\4-1\\Compiler\\Compiler\\random_data_1000000.db;my_data'
-etl.extract(s)
-etl.data.to_csv("test22.csv", index_label='id')
+    def __extract_from_mssql(self, data_source):
+        pass
+
+
+    def __load_to_csv(self, data_destination):
+        self.data.to_csv(data_destination + ".csv", header=None, mode='a')
+
+
+    def __load_to_sqlite(self, data_destination):
+        data_destination = data_destination.split(';')
+        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{data_destination[0]}')
+
+        for df in self.data:
+            df.to_sql(data_destination[1], sqlite_engine, if_exists='append', index=False)
+
+
+    def __load_to_mssql(data_destination):
+        pass
+
 
 
 
