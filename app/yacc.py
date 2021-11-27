@@ -3,7 +3,7 @@ from lex import tokens
 from etl import ETL
 
 
-start = 'select'
+start = 'start'
 def p_start(p):
     'start : select | insert | update | delete'
     pass
@@ -149,17 +149,35 @@ def p_is(p):
 ###########################
 
 def p_select(p):
-    'select : SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON'
+    'select : SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON'
+    from app.etl import ETL
+    data_source = str(p[6][1:-1])
 
-    p[0] = f'{p[1]} {",".join(p[3])}{" ".join(p[4:6])} {p[6][1:-1].split(";")[1]} {" ".join(p[7:])}'
-    ETL.make_query(p[6][1:-1].split(";")[0], p[0])
+    etl = ETL()
+    etl.extract(data_source)
+
+    criteria = {}
+    criteria['distinct'] = p[2]
+    criteria['limit'] = p[10]
+    etl.transform() # according to: where, distinct, group, order, limit, column
+
+
+    if p[4] == None:
+        print(etl.data)
+    else:
+        etl.load(p[4])
+    
+
 
 
 
 def p_distinct(p):
-    '''distinct : DISTINCT 
-                | empty'''
-    p[0] = ''
+    '''distinct : DISTINCT'''
+    p[0] = True
+
+def p_distinct_empty(p):
+    '''distinct : empty'''
+    p[0] = False
 
 def p_column(p):
     '''column : TIMES
@@ -226,9 +244,15 @@ def p_way(p):
     pass
 
 def p_limit(p):
-    '''limit : LIMIT NUMBER
-             | empty'''
-    p[0] = ''
+    '''limit : LIMIT NUMBER'''
+    if p[2] < 0:
+        p[0] = None
+    else:
+        p[0] = int(p[2])
+
+def p_limit_empty(p):
+    'limit : empty'
+    p[0] = None
 
 
 

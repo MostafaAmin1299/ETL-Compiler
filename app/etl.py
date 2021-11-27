@@ -3,7 +3,35 @@ import random
 import datetime
 import sqlalchemy
 
-class ETL:
+class ETL():
+    data:pd.DataFrame = None
+
+    def extract(self, data_source:str):
+        source_type = self.__get_source_type(data_source)
+        if source_type == 'CSV':
+            self.__extract_from_csv(data_source)
+        elif source_type == 'SQLITE':
+            self.__extract_from_sqlite(data_source)
+        elif source_type == 'MSSQL':
+            self.__extract_from_mssql(data_source)
+
+
+    def transform(self, criteria:dict):
+        pass
+
+    def load(self, data_destination:str):
+        source_type = self.__get_source_type(data_destination)
+        if source_type == 'CSV':
+            self.__load_to_csv(data_destination)
+        elif source_type == 'SQLITE':
+            self.__load_to_sqlite(data_destination)
+        elif source_type == 'MSSQL':
+            self.__load_to_mssql(data_destination)
+
+
+
+
+class ETLO:
 
     @staticmethod
     def csv_to_sqlite(csv_file_path, columns_data_types={}, sqlite_db_file_path=None, table_name="csv_data"):
