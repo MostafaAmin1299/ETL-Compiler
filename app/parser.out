@@ -2,1845 +2,1584 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
+    AVG
+    BETWEEN
+    COUNT
+    EXISTS
+    HAVING
+    IN
+    IS
+    MAX
+    MIN
+    NULL
     PATTERN
+    PERCENT
+    SUM
 
 Grammar
 
-Rule 0     S' -> select
-Rule 1     expression -> expression PLUS term
-Rule 2     expression -> expression MINUS term
-Rule 3     expression -> term
-Rule 4     term -> term TIMES factor
-Rule 5     term -> factor
-Rule 6     factor -> NUMBER
-Rule 7     term -> term DIVIDE factor
-Rule 8     factor -> LPAREN expression RPAREN
-Rule 9     where -> WHERE cond
-Rule 10    where -> empty
-Rule 11    cond -> exp op exp
-Rule 12    cond -> exp BETWEEN exp AND exp
-Rule 13    cond -> exp IN tuple
-Rule 14    cond -> exp is
-Rule 15    cond -> exp LIKE STRING
-Rule 16    cond -> EXISTS LPAREN select RPAREN
-Rule 17    cond -> cond AND cond
-Rule 18    cond -> cond OR cond
-Rule 19    cond -> NOT cond
-Rule 20    cond -> LPAREN cond RPAREN
-Rule 21    exp -> STRING
-Rule 22    exp -> NUMBER
-Rule 23    exp -> COLNAME
-Rule 24    exp -> exp aop exp
-Rule 25    exps -> exp
-Rule 26    exps -> exp COMMA exps
-Rule 27    op -> EQUAL
-Rule 28    op -> BIGGER_THAN
-Rule 29    op -> SMALLER_THAN
-Rule 30    op -> NOTEQUAL
-Rule 31    op -> BIGGER_THAN_OR_EQUAL_TO
-Rule 32    op -> SMALLER_THAN_OR_EQUAL_TO
-Rule 33    aop -> PLUS
-Rule 34    aop -> MINUS
-Rule 35    aop -> TIMES
-Rule 36    aop -> DIVIDE
-Rule 37    aop -> PERCENT
-Rule 38    tuple -> select
-Rule 39    tuple -> exps
-Rule 40    tuple -> empty
-Rule 41    is -> IS NULL
-Rule 42    is -> IS NOT NULL
-Rule 43    empty -> <empty>
-Rule 44    select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON
-Rule 45    distinct -> DISTINCT
-Rule 46    distinct -> empty
-Rule 47    column -> TIMES
-Rule 48    column -> COLNAME
-Rule 49    column -> aggregatefun
-Rule 50    column -> column COMMA COLNAME
-Rule 51    aggregatefun -> aggregatename LPAREN distinct column RPAREN
-Rule 52    aggregatename -> COUNT
-Rule 53    aggregatename -> MAX
-Rule 54    aggregatename -> MIN
-Rule 55    aggregatename -> SUM
-Rule 56    aggregatename -> AVG
-Rule 57    into -> INTO DATASOURCE external
-Rule 58    into -> empty
-Rule 59    external -> IN column
-Rule 60    external -> empty
-Rule 61    group -> GROUP BY column having
-Rule 62    group -> empty
-Rule 63    having -> HAVING cond
-Rule 64    having -> empty
-Rule 65    order -> ORDER BY orders
-Rule 66    order -> empty
-Rule 67    orders -> column way
-Rule 68    orders -> orders COMMA orders
-Rule 69    way -> ASC
-Rule 70    way -> DESC
-Rule 71    way -> empty
-Rule 72    limit -> LIMIT NUMBER
-Rule 73    limit -> empty
-Rule 74    insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN value RPAREN SIMICOLON
-Rule 75    insert -> INSERT INTO DATASOURCE icolumn select SIMICOLON
-Rule 76    value -> STRING
-Rule 77    value -> NUMBER
-Rule 78    value -> value COMMA value
-Rule 79    icolumn -> LPAREN COLNAME RPAREN
-Rule 80    icolumn -> empty
-Rule 81    update -> UPDATE DATASOURCE SET assigns where SIMICOLON
-Rule 82    assigns -> column EQUAL value
-Rule 83    assigns -> assigns COMMA assigns
-Rule 84    delete -> DELETE FROM DATASOURCE where
+Rule 0     S' -> start
+Rule 1     start -> select
+Rule 2     start -> insert
+Rule 3     start -> update
+Rule 4     start -> delete
+Rule 5     empty -> <empty>
+Rule 6     select -> SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON
+Rule 7     insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
+Rule 8     insert -> INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON
+Rule 9     expression -> expression PLUS term
+Rule 10    expression -> expression MINUS term
+Rule 11    expression -> term
+Rule 12    term -> term TIMES factor
+Rule 13    term -> factor
+Rule 14    factor -> NUMBER
+Rule 15    term -> term DIVIDE factor
+Rule 16    factor -> LPAREN expression RPAREN
+Rule 17    logical -> EQUAL
+Rule 18    logical -> NOTEQUAL
+Rule 19    logical -> BIGGER_EQUAL
+Rule 20    logical -> BIGGER
+Rule 21    logical -> SMALLER_EQUAL
+Rule 22    logical -> SMALLER
+Rule 23    where -> WHERE conditions
+Rule 24    where -> empty
+Rule 25    conditions -> LPAREN conditions RPAREN
+Rule 26    conditions -> conditions AND conditions
+Rule 27    conditions -> conditions OR conditions
+Rule 28    conditions -> exp LIKE STRING
+Rule 29    conditions -> exp logical exp
+Rule 30    conditions -> NOT conditions
+Rule 31    exp -> STRING
+Rule 32    exp -> COLNAME
+Rule 33    exp -> expression
+Rule 34    distinct -> DISTINCT
+Rule 35    distinct -> empty
+Rule 36    select_columns -> TIMES
+Rule 37    select_columns -> COLNUMBER
+Rule 38    select_columns -> COLNAME
+Rule 39    select_columns -> select_columns COMMA select_columns
+Rule 40    into -> INTO DATASOURCE
+Rule 41    into -> empty
+Rule 42    group -> GROUP BY db_column
+Rule 43    group -> empty
+Rule 44    db_column -> COLNAME
+Rule 45    db_column -> COLNUMBER
+Rule 46    orders -> ORDER BY orders
+Rule 47    orders -> db_column way
+Rule 48    orders -> orders COMMA orders
+Rule 49    order -> empty
+Rule 50    way -> ASC
+Rule 51    way -> empty
+Rule 52    way -> DESC
+Rule 53    limit -> LIMIT NUMBER
+Rule 54    limit -> empty
+Rule 55    values -> STRING
+Rule 56    values -> NUMBER
+Rule 57    values -> values COMMA values
+Rule 58    icolumn -> empty
+Rule 59    update -> UPDATE DATASOURCE SET assigns where SIMICOLON
+Rule 60    assigns -> COLNAME EQUAL
+Rule 61    assigns -> empty
+Rule 62    delete -> DELETE FROM DATASOURCE where
 
 Terminals, with rules where they appear
 
-AND                  : 12 17
-ASC                  : 69
-AVG                  : 56
-BETWEEN              : 12
-BIGGER_THAN          : 28
-BIGGER_THAN_OR_EQUAL_TO : 31
-BY                   : 61 65
-COLNAME              : 23 48 50 79
-COMMA                : 26 50 68 78 83
-COUNT                : 52
-DATASOURCE           : 44 57 74 75 81 84
-DELETE               : 84
-DESC                 : 70
-DISTINCT             : 45
-DIVIDE               : 7 36
-EQUAL                : 27 82
-EXISTS               : 16
-FROM                 : 44 84
-GROUP                : 61
-HAVING               : 63
-IN                   : 13 59
-INSERT               : 74 75
-INTO                 : 57 74 75
-IS                   : 41 42
-LIKE                 : 15
-LIMIT                : 72
-LPAREN               : 8 16 20 51 74 79
-MAX                  : 53
-MIN                  : 54
-MINUS                : 2 34
-NOT                  : 19 42
-NOTEQUAL             : 30
-NULL                 : 41 42
-NUMBER               : 6 22 72 77
-OR                   : 18
-ORDER                : 65
+AND                  : 26
+ASC                  : 50
+AVG                  : 
+BETWEEN              : 
+BIGGER               : 20
+BIGGER_EQUAL         : 19
+BY                   : 42 46
+COLNAME              : 32 38 44 60
+COLNUMBER            : 37 45
+COMMA                : 39 48 57
+COUNT                : 
+DATASOURCE           : 6 7 8 40 59 62
+DELETE               : 62
+DESC                 : 52
+DISTINCT             : 34
+DIVIDE               : 15
+EQUAL                : 17 60
+EXISTS               : 
+FROM                 : 6 62
+GROUP                : 42
+HAVING               : 
+IN                   : 
+INSERT               : 7 8
+INTO                 : 7 8 40
+IS                   : 
+LIKE                 : 28
+LIMIT                : 53
+LPAREN               : 7 8 16 25
+MAX                  : 
+MIN                  : 
+MINUS                : 10
+NOT                  : 30
+NOTEQUAL             : 18
+NULL                 : 
+NUMBER               : 14 53 56
+OR                   : 27
+ORDER                : 46
 PATTERN              : 
-PERCENT              : 37
-PLUS                 : 1 33
-RPAREN               : 8 16 20 51 74 79
-SELECT               : 44
-SET                  : 81
-SIMICOLON            : 44 74 75 81
-SMALLER_THAN         : 29
-SMALLER_THAN_OR_EQUAL_TO : 32
-STRING               : 15 21 76
-SUM                  : 55
-TIMES                : 4 35 47
-UPDATE               : 81
-VALUES               : 74
-WHERE                : 9
+PERCENT              : 
+PLUS                 : 9
+RPAREN               : 7 8 16 25
+SELECT               : 6
+SET                  : 59
+SIMICOLON            : 6 7 8 59
+SMALLER              : 22
+SMALLER_EQUAL        : 21
+STRING               : 28 31 55
+SUM                  : 
+TIMES                : 12 36
+UPDATE               : 59
+VALUES               : 7
+WHERE                : 23
 error                : 
 
 Nonterminals, with rules where they appear
 
-aggregatefun         : 49
-aggregatename        : 51
-aop                  : 24
-assigns              : 81 83 83
-column               : 44 50 51 59 61 67 82
-cond                 : 9 17 17 18 18 19 20 63
-delete               : 
-distinct             : 44 51
-empty                : 10 40 46 58 60 62 64 66 71 73 80
-exp                  : 11 11 12 12 12 13 14 15 24 24 25 26
-expression           : 1 2 8
-exps                 : 26 39
-external             : 57
-factor               : 4 5 7
-group                : 44
-having               : 61
-icolumn              : 74 75
-insert               : 
-into                 : 44
-is                   : 14
-limit                : 44
-op                   : 11
-order                : 44
-orders               : 65 68 68
-select               : 16 38 75 0
-term                 : 1 2 3 4 7
-tuple                : 13
-update               : 
-value                : 74 78 78 82
-way                  : 67
-where                : 44 81 84
+assigns              : 59
+conditions           : 23 25 26 26 27 27 30
+db_column            : 42 47
+delete               : 4
+distinct             : 6
+empty                : 24 35 41 43 49 51 54 58 61
+exp                  : 28 29 29
+expression           : 9 10 16 33
+factor               : 12 13 15
+group                : 6
+icolumn              : 7
+insert               : 2
+into                 : 6
+limit                : 6
+logical              : 29
+order                : 6
+orders               : 46 48 48
+select               : 1 8
+select_columns       : 6 39 39
+start                : 0
+term                 : 9 10 11 12 15
+update               : 3
+values               : 7 57 57
+way                  : 47
+where                : 6 59 62
 
 Parsing method: LALR
 
 state 0
 
-    (0) S' -> . select
-    (44) select -> . SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON
+    (0) S' -> . start
+    (1) start -> . select
+    (2) start -> . insert
+    (3) start -> . update
+    (4) start -> . delete
+    (6) select -> . SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON
+    (7) insert -> . INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
+    (8) insert -> . INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON
+    (59) update -> . UPDATE DATASOURCE SET assigns where SIMICOLON
+    (62) delete -> . DELETE FROM DATASOURCE where
 
-    SELECT          shift and go to state 2
+    SELECT          shift and go to state 6
+    INSERT          shift and go to state 7
+    UPDATE          shift and go to state 8
+    DELETE          shift and go to state 9
 
-    select                         shift and go to state 1
+    start                          shift and go to state 1
+    select                         shift and go to state 2
+    insert                         shift and go to state 3
+    update                         shift and go to state 4
+    delete                         shift and go to state 5
 
 state 1
 
-    (0) S' -> select .
+    (0) S' -> start .
 
 
 
 state 2
 
-    (44) select -> SELECT . distinct column into FROM DATASOURCE where group order limit SIMICOLON
-    (45) distinct -> . DISTINCT
-    (46) distinct -> . empty
-    (43) empty -> .
+    (1) start -> select .
 
-    DISTINCT        shift and go to state 4
-    TIMES           reduce using rule 43 (empty -> .)
-    COLNAME         reduce using rule 43 (empty -> .)
-    COUNT           reduce using rule 43 (empty -> .)
-    MAX             reduce using rule 43 (empty -> .)
-    MIN             reduce using rule 43 (empty -> .)
-    SUM             reduce using rule 43 (empty -> .)
-    AVG             reduce using rule 43 (empty -> .)
+    $end            reduce using rule 1 (start -> select .)
 
-    distinct                       shift and go to state 3
-    empty                          shift and go to state 5
 
 state 3
 
-    (44) select -> SELECT distinct . column into FROM DATASOURCE where group order limit SIMICOLON
-    (47) column -> . TIMES
-    (48) column -> . COLNAME
-    (49) column -> . aggregatefun
-    (50) column -> . column COMMA COLNAME
-    (51) aggregatefun -> . aggregatename LPAREN distinct column RPAREN
-    (52) aggregatename -> . COUNT
-    (53) aggregatename -> . MAX
-    (54) aggregatename -> . MIN
-    (55) aggregatename -> . SUM
-    (56) aggregatename -> . AVG
+    (2) start -> insert .
 
-    TIMES           shift and go to state 7
-    COLNAME         shift and go to state 8
-    COUNT           shift and go to state 11
-    MAX             shift and go to state 12
-    MIN             shift and go to state 13
-    SUM             shift and go to state 14
-    AVG             shift and go to state 15
+    $end            reduce using rule 2 (start -> insert .)
 
-    column                         shift and go to state 6
-    aggregatefun                   shift and go to state 9
-    aggregatename                  shift and go to state 10
 
 state 4
 
-    (45) distinct -> DISTINCT .
+    (3) start -> update .
 
-    TIMES           reduce using rule 45 (distinct -> DISTINCT .)
-    COLNAME         reduce using rule 45 (distinct -> DISTINCT .)
-    COUNT           reduce using rule 45 (distinct -> DISTINCT .)
-    MAX             reduce using rule 45 (distinct -> DISTINCT .)
-    MIN             reduce using rule 45 (distinct -> DISTINCT .)
-    SUM             reduce using rule 45 (distinct -> DISTINCT .)
-    AVG             reduce using rule 45 (distinct -> DISTINCT .)
+    $end            reduce using rule 3 (start -> update .)
 
 
 state 5
 
-    (46) distinct -> empty .
+    (4) start -> delete .
 
-    TIMES           reduce using rule 46 (distinct -> empty .)
-    COLNAME         reduce using rule 46 (distinct -> empty .)
-    COUNT           reduce using rule 46 (distinct -> empty .)
-    MAX             reduce using rule 46 (distinct -> empty .)
-    MIN             reduce using rule 46 (distinct -> empty .)
-    SUM             reduce using rule 46 (distinct -> empty .)
-    AVG             reduce using rule 46 (distinct -> empty .)
+    $end            reduce using rule 4 (start -> delete .)
 
 
 state 6
 
-    (44) select -> SELECT distinct column . into FROM DATASOURCE where group order limit SIMICOLON
-    (50) column -> column . COMMA COLNAME
-    (57) into -> . INTO DATASOURCE external
-    (58) into -> . empty
-    (43) empty -> .
+    (6) select -> SELECT . distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON
+    (34) distinct -> . DISTINCT
+    (35) distinct -> . empty
+    (5) empty -> .
 
-    COMMA           shift and go to state 17
-    INTO            shift and go to state 18
-    FROM            reduce using rule 43 (empty -> .)
+    DISTINCT        shift and go to state 11
+    TIMES           reduce using rule 5 (empty -> .)
+    COLNUMBER       reduce using rule 5 (empty -> .)
+    COLNAME         reduce using rule 5 (empty -> .)
 
-    into                           shift and go to state 16
-    empty                          shift and go to state 19
+    distinct                       shift and go to state 10
+    empty                          shift and go to state 12
 
 state 7
 
-    (47) column -> TIMES .
+    (7) insert -> INSERT . INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
+    (8) insert -> INSERT . INTO DATASOURCE LPAREN select RPAREN SIMICOLON
 
-    COMMA           reduce using rule 47 (column -> TIMES .)
-    INTO            reduce using rule 47 (column -> TIMES .)
-    FROM            reduce using rule 47 (column -> TIMES .)
-    RPAREN          reduce using rule 47 (column -> TIMES .)
-    HAVING          reduce using rule 47 (column -> TIMES .)
-    ORDER           reduce using rule 47 (column -> TIMES .)
-    LIMIT           reduce using rule 47 (column -> TIMES .)
-    SIMICOLON       reduce using rule 47 (column -> TIMES .)
-    ASC             reduce using rule 47 (column -> TIMES .)
-    DESC            reduce using rule 47 (column -> TIMES .)
+    INTO            shift and go to state 13
 
 
 state 8
 
-    (48) column -> COLNAME .
+    (59) update -> UPDATE . DATASOURCE SET assigns where SIMICOLON
 
-    COMMA           reduce using rule 48 (column -> COLNAME .)
-    INTO            reduce using rule 48 (column -> COLNAME .)
-    FROM            reduce using rule 48 (column -> COLNAME .)
-    RPAREN          reduce using rule 48 (column -> COLNAME .)
-    HAVING          reduce using rule 48 (column -> COLNAME .)
-    ORDER           reduce using rule 48 (column -> COLNAME .)
-    LIMIT           reduce using rule 48 (column -> COLNAME .)
-    SIMICOLON       reduce using rule 48 (column -> COLNAME .)
-    ASC             reduce using rule 48 (column -> COLNAME .)
-    DESC            reduce using rule 48 (column -> COLNAME .)
+    DATASOURCE      shift and go to state 14
 
 
 state 9
 
-    (49) column -> aggregatefun .
+    (62) delete -> DELETE . FROM DATASOURCE where
 
-    COMMA           reduce using rule 49 (column -> aggregatefun .)
-    INTO            reduce using rule 49 (column -> aggregatefun .)
-    FROM            reduce using rule 49 (column -> aggregatefun .)
-    RPAREN          reduce using rule 49 (column -> aggregatefun .)
-    HAVING          reduce using rule 49 (column -> aggregatefun .)
-    ORDER           reduce using rule 49 (column -> aggregatefun .)
-    LIMIT           reduce using rule 49 (column -> aggregatefun .)
-    SIMICOLON       reduce using rule 49 (column -> aggregatefun .)
-    ASC             reduce using rule 49 (column -> aggregatefun .)
-    DESC            reduce using rule 49 (column -> aggregatefun .)
+    FROM            shift and go to state 15
 
 
 state 10
 
-    (51) aggregatefun -> aggregatename . LPAREN distinct column RPAREN
+    (6) select -> SELECT distinct . select_columns FROM DATASOURCE into where group order limit SIMICOLON
+    (36) select_columns -> . TIMES
+    (37) select_columns -> . COLNUMBER
+    (38) select_columns -> . COLNAME
+    (39) select_columns -> . select_columns COMMA select_columns
 
-    LPAREN          shift and go to state 20
+    TIMES           shift and go to state 17
+    COLNUMBER       shift and go to state 18
+    COLNAME         shift and go to state 19
 
+    select_columns                 shift and go to state 16
 
 state 11
 
-    (52) aggregatename -> COUNT .
+    (34) distinct -> DISTINCT .
 
-    LPAREN          reduce using rule 52 (aggregatename -> COUNT .)
+    TIMES           reduce using rule 34 (distinct -> DISTINCT .)
+    COLNUMBER       reduce using rule 34 (distinct -> DISTINCT .)
+    COLNAME         reduce using rule 34 (distinct -> DISTINCT .)
 
 
 state 12
 
-    (53) aggregatename -> MAX .
+    (35) distinct -> empty .
 
-    LPAREN          reduce using rule 53 (aggregatename -> MAX .)
+    TIMES           reduce using rule 35 (distinct -> empty .)
+    COLNUMBER       reduce using rule 35 (distinct -> empty .)
+    COLNAME         reduce using rule 35 (distinct -> empty .)
 
 
 state 13
 
-    (54) aggregatename -> MIN .
+    (7) insert -> INSERT INTO . DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
+    (8) insert -> INSERT INTO . DATASOURCE LPAREN select RPAREN SIMICOLON
 
-    LPAREN          reduce using rule 54 (aggregatename -> MIN .)
+    DATASOURCE      shift and go to state 20
 
 
 state 14
 
-    (55) aggregatename -> SUM .
+    (59) update -> UPDATE DATASOURCE . SET assigns where SIMICOLON
 
-    LPAREN          reduce using rule 55 (aggregatename -> SUM .)
+    SET             shift and go to state 21
 
 
 state 15
 
-    (56) aggregatename -> AVG .
+    (62) delete -> DELETE FROM . DATASOURCE where
 
-    LPAREN          reduce using rule 56 (aggregatename -> AVG .)
+    DATASOURCE      shift and go to state 22
 
 
 state 16
 
-    (44) select -> SELECT distinct column into . FROM DATASOURCE where group order limit SIMICOLON
+    (6) select -> SELECT distinct select_columns . FROM DATASOURCE into where group order limit SIMICOLON
+    (39) select_columns -> select_columns . COMMA select_columns
 
-    FROM            shift and go to state 21
+    FROM            shift and go to state 23
+    COMMA           shift and go to state 24
 
 
 state 17
 
-    (50) column -> column COMMA . COLNAME
+    (36) select_columns -> TIMES .
 
-    COLNAME         shift and go to state 22
+    FROM            reduce using rule 36 (select_columns -> TIMES .)
+    COMMA           reduce using rule 36 (select_columns -> TIMES .)
 
 
 state 18
 
-    (57) into -> INTO . DATASOURCE external
+    (37) select_columns -> COLNUMBER .
 
-    DATASOURCE      shift and go to state 23
+    FROM            reduce using rule 37 (select_columns -> COLNUMBER .)
+    COMMA           reduce using rule 37 (select_columns -> COLNUMBER .)
 
 
 state 19
 
-    (58) into -> empty .
+    (38) select_columns -> COLNAME .
 
-    FROM            reduce using rule 58 (into -> empty .)
+    FROM            reduce using rule 38 (select_columns -> COLNAME .)
+    COMMA           reduce using rule 38 (select_columns -> COLNAME .)
 
 
 state 20
 
-    (51) aggregatefun -> aggregatename LPAREN . distinct column RPAREN
-    (45) distinct -> . DISTINCT
-    (46) distinct -> . empty
-    (43) empty -> .
+    (7) insert -> INSERT INTO DATASOURCE . icolumn VALUES LPAREN values RPAREN SIMICOLON
+    (8) insert -> INSERT INTO DATASOURCE . LPAREN select RPAREN SIMICOLON
+    (58) icolumn -> . empty
+    (5) empty -> .
 
-    DISTINCT        shift and go to state 4
-    TIMES           reduce using rule 43 (empty -> .)
-    COLNAME         reduce using rule 43 (empty -> .)
-    COUNT           reduce using rule 43 (empty -> .)
-    MAX             reduce using rule 43 (empty -> .)
-    MIN             reduce using rule 43 (empty -> .)
-    SUM             reduce using rule 43 (empty -> .)
-    AVG             reduce using rule 43 (empty -> .)
+    LPAREN          shift and go to state 26
+    VALUES          reduce using rule 5 (empty -> .)
 
-    distinct                       shift and go to state 24
-    empty                          shift and go to state 5
+    icolumn                        shift and go to state 25
+    empty                          shift and go to state 27
 
 state 21
 
-    (44) select -> SELECT distinct column into FROM . DATASOURCE where group order limit SIMICOLON
+    (59) update -> UPDATE DATASOURCE SET . assigns where SIMICOLON
+    (60) assigns -> . COLNAME EQUAL
+    (61) assigns -> . empty
+    (5) empty -> .
 
-    DATASOURCE      shift and go to state 25
+    COLNAME         shift and go to state 29
+    WHERE           reduce using rule 5 (empty -> .)
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
+    assigns                        shift and go to state 28
+    empty                          shift and go to state 30
 
 state 22
 
-    (50) column -> column COMMA COLNAME .
+    (62) delete -> DELETE FROM DATASOURCE . where
+    (23) where -> . WHERE conditions
+    (24) where -> . empty
+    (5) empty -> .
 
-    COMMA           reduce using rule 50 (column -> column COMMA COLNAME .)
-    INTO            reduce using rule 50 (column -> column COMMA COLNAME .)
-    FROM            reduce using rule 50 (column -> column COMMA COLNAME .)
-    RPAREN          reduce using rule 50 (column -> column COMMA COLNAME .)
-    HAVING          reduce using rule 50 (column -> column COMMA COLNAME .)
-    ORDER           reduce using rule 50 (column -> column COMMA COLNAME .)
-    LIMIT           reduce using rule 50 (column -> column COMMA COLNAME .)
-    SIMICOLON       reduce using rule 50 (column -> column COMMA COLNAME .)
-    ASC             reduce using rule 50 (column -> column COMMA COLNAME .)
-    DESC            reduce using rule 50 (column -> column COMMA COLNAME .)
+    WHERE           shift and go to state 32
+    $end            reduce using rule 5 (empty -> .)
 
+    where                          shift and go to state 31
+    empty                          shift and go to state 33
 
 state 23
 
-    (57) into -> INTO DATASOURCE . external
-    (59) external -> . IN column
-    (60) external -> . empty
-    (43) empty -> .
+    (6) select -> SELECT distinct select_columns FROM . DATASOURCE into where group order limit SIMICOLON
 
-    IN              shift and go to state 27
-    FROM            reduce using rule 43 (empty -> .)
+    DATASOURCE      shift and go to state 34
 
-    external                       shift and go to state 26
-    empty                          shift and go to state 28
 
 state 24
 
-    (51) aggregatefun -> aggregatename LPAREN distinct . column RPAREN
-    (47) column -> . TIMES
-    (48) column -> . COLNAME
-    (49) column -> . aggregatefun
-    (50) column -> . column COMMA COLNAME
-    (51) aggregatefun -> . aggregatename LPAREN distinct column RPAREN
-    (52) aggregatename -> . COUNT
-    (53) aggregatename -> . MAX
-    (54) aggregatename -> . MIN
-    (55) aggregatename -> . SUM
-    (56) aggregatename -> . AVG
+    (39) select_columns -> select_columns COMMA . select_columns
+    (36) select_columns -> . TIMES
+    (37) select_columns -> . COLNUMBER
+    (38) select_columns -> . COLNAME
+    (39) select_columns -> . select_columns COMMA select_columns
 
-    TIMES           shift and go to state 7
-    COLNAME         shift and go to state 8
-    COUNT           shift and go to state 11
-    MAX             shift and go to state 12
-    MIN             shift and go to state 13
-    SUM             shift and go to state 14
-    AVG             shift and go to state 15
+    TIMES           shift and go to state 17
+    COLNUMBER       shift and go to state 18
+    COLNAME         shift and go to state 19
 
-    aggregatename                  shift and go to state 10
-    column                         shift and go to state 29
-    aggregatefun                   shift and go to state 9
+    select_columns                 shift and go to state 35
 
 state 25
 
-    (44) select -> SELECT distinct column into FROM DATASOURCE . where group order limit SIMICOLON
-    (9) where -> . WHERE cond
-    (10) where -> . empty
-    (43) empty -> .
+    (7) insert -> INSERT INTO DATASOURCE icolumn . VALUES LPAREN values RPAREN SIMICOLON
 
-    WHERE           shift and go to state 31
-    GROUP           reduce using rule 43 (empty -> .)
-    ORDER           reduce using rule 43 (empty -> .)
-    LIMIT           reduce using rule 43 (empty -> .)
-    SIMICOLON       reduce using rule 43 (empty -> .)
+    VALUES          shift and go to state 36
 
-    where                          shift and go to state 30
-    empty                          shift and go to state 32
 
 state 26
 
-    (57) into -> INTO DATASOURCE external .
+    (8) insert -> INSERT INTO DATASOURCE LPAREN . select RPAREN SIMICOLON
+    (6) select -> . SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON
 
-    FROM            reduce using rule 57 (into -> INTO DATASOURCE external .)
+    SELECT          shift and go to state 6
 
+    select                         shift and go to state 37
 
 state 27
 
-    (59) external -> IN . column
-    (47) column -> . TIMES
-    (48) column -> . COLNAME
-    (49) column -> . aggregatefun
-    (50) column -> . column COMMA COLNAME
-    (51) aggregatefun -> . aggregatename LPAREN distinct column RPAREN
-    (52) aggregatename -> . COUNT
-    (53) aggregatename -> . MAX
-    (54) aggregatename -> . MIN
-    (55) aggregatename -> . SUM
-    (56) aggregatename -> . AVG
+    (58) icolumn -> empty .
 
-    TIMES           shift and go to state 7
-    COLNAME         shift and go to state 8
-    COUNT           shift and go to state 11
-    MAX             shift and go to state 12
-    MIN             shift and go to state 13
-    SUM             shift and go to state 14
-    AVG             shift and go to state 15
+    VALUES          reduce using rule 58 (icolumn -> empty .)
 
-    column                         shift and go to state 33
-    aggregatefun                   shift and go to state 9
-    aggregatename                  shift and go to state 10
 
 state 28
 
-    (60) external -> empty .
+    (59) update -> UPDATE DATASOURCE SET assigns . where SIMICOLON
+    (23) where -> . WHERE conditions
+    (24) where -> . empty
+    (5) empty -> .
 
-    FROM            reduce using rule 60 (external -> empty .)
+    WHERE           shift and go to state 32
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
+    where                          shift and go to state 38
+    empty                          shift and go to state 33
 
 state 29
 
-    (51) aggregatefun -> aggregatename LPAREN distinct column . RPAREN
-    (50) column -> column . COMMA COLNAME
+    (60) assigns -> COLNAME . EQUAL
 
-    RPAREN          shift and go to state 34
-    COMMA           shift and go to state 17
+    EQUAL           shift and go to state 39
 
 
 state 30
 
-    (44) select -> SELECT distinct column into FROM DATASOURCE where . group order limit SIMICOLON
-    (61) group -> . GROUP BY column having
-    (62) group -> . empty
-    (43) empty -> .
+    (61) assigns -> empty .
 
-    GROUP           shift and go to state 36
-    ORDER           reduce using rule 43 (empty -> .)
-    LIMIT           reduce using rule 43 (empty -> .)
-    SIMICOLON       reduce using rule 43 (empty -> .)
+    WHERE           reduce using rule 61 (assigns -> empty .)
+    SIMICOLON       reduce using rule 61 (assigns -> empty .)
 
-    group                          shift and go to state 35
-    empty                          shift and go to state 37
 
 state 31
 
-    (9) where -> WHERE . cond
-    (11) cond -> . exp op exp
-    (12) cond -> . exp BETWEEN exp AND exp
-    (13) cond -> . exp IN tuple
-    (14) cond -> . exp is
-    (15) cond -> . exp LIKE STRING
-    (16) cond -> . EXISTS LPAREN select RPAREN
-    (17) cond -> . cond AND cond
-    (18) cond -> . cond OR cond
-    (19) cond -> . NOT cond
-    (20) cond -> . LPAREN cond RPAREN
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (62) delete -> DELETE FROM DATASOURCE where .
 
-    EXISTS          shift and go to state 41
-    NOT             shift and go to state 43
-    LPAREN          shift and go to state 42
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    $end            reduce using rule 62 (delete -> DELETE FROM DATASOURCE where .)
 
-    cond                           shift and go to state 38
-    exp                            shift and go to state 39
 
 state 32
 
-    (10) where -> empty .
+    (23) where -> WHERE . conditions
+    (25) conditions -> . LPAREN conditions RPAREN
+    (26) conditions -> . conditions AND conditions
+    (27) conditions -> . conditions OR conditions
+    (28) conditions -> . exp LIKE STRING
+    (29) conditions -> . exp logical exp
+    (30) conditions -> . NOT conditions
+    (31) exp -> . STRING
+    (32) exp -> . COLNAME
+    (33) exp -> . expression
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    GROUP           reduce using rule 10 (where -> empty .)
-    ORDER           reduce using rule 10 (where -> empty .)
-    LIMIT           reduce using rule 10 (where -> empty .)
-    SIMICOLON       reduce using rule 10 (where -> empty .)
+    LPAREN          shift and go to state 41
+    NOT             shift and go to state 44
+    STRING          shift and go to state 43
+    COLNAME         shift and go to state 45
+    NUMBER          shift and go to state 49
 
+    conditions                     shift and go to state 40
+    exp                            shift and go to state 42
+    expression                     shift and go to state 46
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 33
 
-    (59) external -> IN column .
-    (50) column -> column . COMMA COLNAME
+    (24) where -> empty .
 
-    FROM            reduce using rule 59 (external -> IN column .)
-    COMMA           shift and go to state 17
+    $end            reduce using rule 24 (where -> empty .)
+    SIMICOLON       reduce using rule 24 (where -> empty .)
+    GROUP           reduce using rule 24 (where -> empty .)
+    LIMIT           reduce using rule 24 (where -> empty .)
 
 
 state 34
 
-    (51) aggregatefun -> aggregatename LPAREN distinct column RPAREN .
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE . into where group order limit SIMICOLON
+    (40) into -> . INTO DATASOURCE
+    (41) into -> . empty
+    (5) empty -> .
 
-    COMMA           reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    INTO            reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    FROM            reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    RPAREN          reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    HAVING          reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    ORDER           reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    LIMIT           reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    SIMICOLON       reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    ASC             reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
-    DESC            reduce using rule 51 (aggregatefun -> aggregatename LPAREN distinct column RPAREN .)
+    INTO            shift and go to state 51
+    WHERE           reduce using rule 5 (empty -> .)
+    GROUP           reduce using rule 5 (empty -> .)
+    LIMIT           reduce using rule 5 (empty -> .)
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
+    into                           shift and go to state 50
+    empty                          shift and go to state 52
 
 state 35
 
-    (44) select -> SELECT distinct column into FROM DATASOURCE where group . order limit SIMICOLON
-    (65) order -> . ORDER BY orders
-    (66) order -> . empty
-    (43) empty -> .
+    (39) select_columns -> select_columns COMMA select_columns .
+    (39) select_columns -> select_columns . COMMA select_columns
 
-    ORDER           shift and go to state 47
-    LIMIT           reduce using rule 43 (empty -> .)
-    SIMICOLON       reduce using rule 43 (empty -> .)
+  ! shift/reduce conflict for COMMA resolved as shift
+    FROM            reduce using rule 39 (select_columns -> select_columns COMMA select_columns .)
+    COMMA           shift and go to state 24
 
-    order                          shift and go to state 46
-    empty                          shift and go to state 48
+  ! COMMA           [ reduce using rule 39 (select_columns -> select_columns COMMA select_columns .) ]
+
 
 state 36
 
-    (61) group -> GROUP . BY column having
+    (7) insert -> INSERT INTO DATASOURCE icolumn VALUES . LPAREN values RPAREN SIMICOLON
 
-    BY              shift and go to state 49
+    LPAREN          shift and go to state 53
 
 
 state 37
 
-    (62) group -> empty .
+    (8) insert -> INSERT INTO DATASOURCE LPAREN select . RPAREN SIMICOLON
 
-    ORDER           reduce using rule 62 (group -> empty .)
-    LIMIT           reduce using rule 62 (group -> empty .)
-    SIMICOLON       reduce using rule 62 (group -> empty .)
+    RPAREN          shift and go to state 54
 
 
 state 38
 
-    (9) where -> WHERE cond .
-    (17) cond -> cond . AND cond
-    (18) cond -> cond . OR cond
+    (59) update -> UPDATE DATASOURCE SET assigns where . SIMICOLON
 
-    GROUP           reduce using rule 9 (where -> WHERE cond .)
-    ORDER           reduce using rule 9 (where -> WHERE cond .)
-    LIMIT           reduce using rule 9 (where -> WHERE cond .)
-    SIMICOLON       reduce using rule 9 (where -> WHERE cond .)
-    AND             shift and go to state 50
-    OR              shift and go to state 51
+    SIMICOLON       shift and go to state 55
 
 
 state 39
 
-    (11) cond -> exp . op exp
-    (12) cond -> exp . BETWEEN exp AND exp
-    (13) cond -> exp . IN tuple
-    (14) cond -> exp . is
-    (15) cond -> exp . LIKE STRING
-    (24) exp -> exp . aop exp
-    (27) op -> . EQUAL
-    (28) op -> . BIGGER_THAN
-    (29) op -> . SMALLER_THAN
-    (30) op -> . NOTEQUAL
-    (31) op -> . BIGGER_THAN_OR_EQUAL_TO
-    (32) op -> . SMALLER_THAN_OR_EQUAL_TO
-    (41) is -> . IS NULL
-    (42) is -> . IS NOT NULL
-    (33) aop -> . PLUS
-    (34) aop -> . MINUS
-    (35) aop -> . TIMES
-    (36) aop -> . DIVIDE
-    (37) aop -> . PERCENT
+    (60) assigns -> COLNAME EQUAL .
 
-    BETWEEN         shift and go to state 53
-    IN              shift and go to state 54
-    LIKE            shift and go to state 56
-    EQUAL           shift and go to state 58
-    BIGGER_THAN     shift and go to state 59
-    SMALLER_THAN    shift and go to state 60
-    NOTEQUAL        shift and go to state 61
-    BIGGER_THAN_OR_EQUAL_TO shift and go to state 62
-    SMALLER_THAN_OR_EQUAL_TO shift and go to state 63
-    IS              shift and go to state 64
-    PLUS            shift and go to state 65
-    MINUS           shift and go to state 66
-    TIMES           shift and go to state 67
-    DIVIDE          shift and go to state 68
-    PERCENT         shift and go to state 69
+    WHERE           reduce using rule 60 (assigns -> COLNAME EQUAL .)
+    SIMICOLON       reduce using rule 60 (assigns -> COLNAME EQUAL .)
 
-    op                             shift and go to state 52
-    is                             shift and go to state 55
-    aop                            shift and go to state 57
 
 state 40
 
-    (21) exp -> STRING .
+    (23) where -> WHERE conditions .
+    (26) conditions -> conditions . AND conditions
+    (27) conditions -> conditions . OR conditions
 
-    BETWEEN         reduce using rule 21 (exp -> STRING .)
-    IN              reduce using rule 21 (exp -> STRING .)
-    LIKE            reduce using rule 21 (exp -> STRING .)
-    EQUAL           reduce using rule 21 (exp -> STRING .)
-    BIGGER_THAN     reduce using rule 21 (exp -> STRING .)
-    SMALLER_THAN    reduce using rule 21 (exp -> STRING .)
-    NOTEQUAL        reduce using rule 21 (exp -> STRING .)
-    BIGGER_THAN_OR_EQUAL_TO reduce using rule 21 (exp -> STRING .)
-    SMALLER_THAN_OR_EQUAL_TO reduce using rule 21 (exp -> STRING .)
-    IS              reduce using rule 21 (exp -> STRING .)
-    PLUS            reduce using rule 21 (exp -> STRING .)
-    MINUS           reduce using rule 21 (exp -> STRING .)
-    TIMES           reduce using rule 21 (exp -> STRING .)
-    DIVIDE          reduce using rule 21 (exp -> STRING .)
-    PERCENT         reduce using rule 21 (exp -> STRING .)
-    AND             reduce using rule 21 (exp -> STRING .)
-    OR              reduce using rule 21 (exp -> STRING .)
-    GROUP           reduce using rule 21 (exp -> STRING .)
-    ORDER           reduce using rule 21 (exp -> STRING .)
-    LIMIT           reduce using rule 21 (exp -> STRING .)
-    SIMICOLON       reduce using rule 21 (exp -> STRING .)
-    RPAREN          reduce using rule 21 (exp -> STRING .)
-    COMMA           reduce using rule 21 (exp -> STRING .)
+    $end            reduce using rule 23 (where -> WHERE conditions .)
+    SIMICOLON       reduce using rule 23 (where -> WHERE conditions .)
+    GROUP           reduce using rule 23 (where -> WHERE conditions .)
+    LIMIT           reduce using rule 23 (where -> WHERE conditions .)
+    AND             shift and go to state 56
+    OR              shift and go to state 57
 
 
 state 41
 
-    (16) cond -> EXISTS . LPAREN select RPAREN
+    (25) conditions -> LPAREN . conditions RPAREN
+    (16) factor -> LPAREN . expression RPAREN
+    (25) conditions -> . LPAREN conditions RPAREN
+    (26) conditions -> . conditions AND conditions
+    (27) conditions -> . conditions OR conditions
+    (28) conditions -> . exp LIKE STRING
+    (29) conditions -> . exp logical exp
+    (30) conditions -> . NOT conditions
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (31) exp -> . STRING
+    (32) exp -> . COLNAME
+    (33) exp -> . expression
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    LPAREN          shift and go to state 70
+    LPAREN          shift and go to state 41
+    NOT             shift and go to state 44
+    STRING          shift and go to state 43
+    COLNAME         shift and go to state 45
+    NUMBER          shift and go to state 49
 
+    conditions                     shift and go to state 58
+    expression                     shift and go to state 59
+    exp                            shift and go to state 42
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 42
 
-    (20) cond -> LPAREN . cond RPAREN
-    (11) cond -> . exp op exp
-    (12) cond -> . exp BETWEEN exp AND exp
-    (13) cond -> . exp IN tuple
-    (14) cond -> . exp is
-    (15) cond -> . exp LIKE STRING
-    (16) cond -> . EXISTS LPAREN select RPAREN
-    (17) cond -> . cond AND cond
-    (18) cond -> . cond OR cond
-    (19) cond -> . NOT cond
-    (20) cond -> . LPAREN cond RPAREN
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (28) conditions -> exp . LIKE STRING
+    (29) conditions -> exp . logical exp
+    (17) logical -> . EQUAL
+    (18) logical -> . NOTEQUAL
+    (19) logical -> . BIGGER_EQUAL
+    (20) logical -> . BIGGER
+    (21) logical -> . SMALLER_EQUAL
+    (22) logical -> . SMALLER
 
-    EXISTS          shift and go to state 41
-    NOT             shift and go to state 43
-    LPAREN          shift and go to state 42
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    LIKE            shift and go to state 60
+    EQUAL           shift and go to state 62
+    NOTEQUAL        shift and go to state 63
+    BIGGER_EQUAL    shift and go to state 64
+    BIGGER          shift and go to state 65
+    SMALLER_EQUAL   shift and go to state 66
+    SMALLER         shift and go to state 67
 
-    cond                           shift and go to state 71
-    exp                            shift and go to state 39
+    logical                        shift and go to state 61
 
 state 43
 
-    (19) cond -> NOT . cond
-    (11) cond -> . exp op exp
-    (12) cond -> . exp BETWEEN exp AND exp
-    (13) cond -> . exp IN tuple
-    (14) cond -> . exp is
-    (15) cond -> . exp LIKE STRING
-    (16) cond -> . EXISTS LPAREN select RPAREN
-    (17) cond -> . cond AND cond
-    (18) cond -> . cond OR cond
-    (19) cond -> . NOT cond
-    (20) cond -> . LPAREN cond RPAREN
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (31) exp -> STRING .
 
-    EXISTS          shift and go to state 41
-    NOT             shift and go to state 43
-    LPAREN          shift and go to state 42
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    LIKE            reduce using rule 31 (exp -> STRING .)
+    EQUAL           reduce using rule 31 (exp -> STRING .)
+    NOTEQUAL        reduce using rule 31 (exp -> STRING .)
+    BIGGER_EQUAL    reduce using rule 31 (exp -> STRING .)
+    BIGGER          reduce using rule 31 (exp -> STRING .)
+    SMALLER_EQUAL   reduce using rule 31 (exp -> STRING .)
+    SMALLER         reduce using rule 31 (exp -> STRING .)
+    AND             reduce using rule 31 (exp -> STRING .)
+    OR              reduce using rule 31 (exp -> STRING .)
+    $end            reduce using rule 31 (exp -> STRING .)
+    SIMICOLON       reduce using rule 31 (exp -> STRING .)
+    GROUP           reduce using rule 31 (exp -> STRING .)
+    LIMIT           reduce using rule 31 (exp -> STRING .)
+    RPAREN          reduce using rule 31 (exp -> STRING .)
 
-    cond                           shift and go to state 72
-    exp                            shift and go to state 39
 
 state 44
 
-    (22) exp -> NUMBER .
+    (30) conditions -> NOT . conditions
+    (25) conditions -> . LPAREN conditions RPAREN
+    (26) conditions -> . conditions AND conditions
+    (27) conditions -> . conditions OR conditions
+    (28) conditions -> . exp LIKE STRING
+    (29) conditions -> . exp logical exp
+    (30) conditions -> . NOT conditions
+    (31) exp -> . STRING
+    (32) exp -> . COLNAME
+    (33) exp -> . expression
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    BETWEEN         reduce using rule 22 (exp -> NUMBER .)
-    IN              reduce using rule 22 (exp -> NUMBER .)
-    LIKE            reduce using rule 22 (exp -> NUMBER .)
-    EQUAL           reduce using rule 22 (exp -> NUMBER .)
-    BIGGER_THAN     reduce using rule 22 (exp -> NUMBER .)
-    SMALLER_THAN    reduce using rule 22 (exp -> NUMBER .)
-    NOTEQUAL        reduce using rule 22 (exp -> NUMBER .)
-    BIGGER_THAN_OR_EQUAL_TO reduce using rule 22 (exp -> NUMBER .)
-    SMALLER_THAN_OR_EQUAL_TO reduce using rule 22 (exp -> NUMBER .)
-    IS              reduce using rule 22 (exp -> NUMBER .)
-    PLUS            reduce using rule 22 (exp -> NUMBER .)
-    MINUS           reduce using rule 22 (exp -> NUMBER .)
-    TIMES           reduce using rule 22 (exp -> NUMBER .)
-    DIVIDE          reduce using rule 22 (exp -> NUMBER .)
-    PERCENT         reduce using rule 22 (exp -> NUMBER .)
-    AND             reduce using rule 22 (exp -> NUMBER .)
-    OR              reduce using rule 22 (exp -> NUMBER .)
-    GROUP           reduce using rule 22 (exp -> NUMBER .)
-    ORDER           reduce using rule 22 (exp -> NUMBER .)
-    LIMIT           reduce using rule 22 (exp -> NUMBER .)
-    SIMICOLON       reduce using rule 22 (exp -> NUMBER .)
-    RPAREN          reduce using rule 22 (exp -> NUMBER .)
-    COMMA           reduce using rule 22 (exp -> NUMBER .)
+    LPAREN          shift and go to state 41
+    NOT             shift and go to state 44
+    STRING          shift and go to state 43
+    COLNAME         shift and go to state 45
+    NUMBER          shift and go to state 49
 
+    conditions                     shift and go to state 68
+    exp                            shift and go to state 42
+    expression                     shift and go to state 46
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 45
 
-    (23) exp -> COLNAME .
+    (32) exp -> COLNAME .
 
-    BETWEEN         reduce using rule 23 (exp -> COLNAME .)
-    IN              reduce using rule 23 (exp -> COLNAME .)
-    LIKE            reduce using rule 23 (exp -> COLNAME .)
-    EQUAL           reduce using rule 23 (exp -> COLNAME .)
-    BIGGER_THAN     reduce using rule 23 (exp -> COLNAME .)
-    SMALLER_THAN    reduce using rule 23 (exp -> COLNAME .)
-    NOTEQUAL        reduce using rule 23 (exp -> COLNAME .)
-    BIGGER_THAN_OR_EQUAL_TO reduce using rule 23 (exp -> COLNAME .)
-    SMALLER_THAN_OR_EQUAL_TO reduce using rule 23 (exp -> COLNAME .)
-    IS              reduce using rule 23 (exp -> COLNAME .)
-    PLUS            reduce using rule 23 (exp -> COLNAME .)
-    MINUS           reduce using rule 23 (exp -> COLNAME .)
-    TIMES           reduce using rule 23 (exp -> COLNAME .)
-    DIVIDE          reduce using rule 23 (exp -> COLNAME .)
-    PERCENT         reduce using rule 23 (exp -> COLNAME .)
-    AND             reduce using rule 23 (exp -> COLNAME .)
-    OR              reduce using rule 23 (exp -> COLNAME .)
-    GROUP           reduce using rule 23 (exp -> COLNAME .)
-    ORDER           reduce using rule 23 (exp -> COLNAME .)
-    LIMIT           reduce using rule 23 (exp -> COLNAME .)
-    SIMICOLON       reduce using rule 23 (exp -> COLNAME .)
-    RPAREN          reduce using rule 23 (exp -> COLNAME .)
-    COMMA           reduce using rule 23 (exp -> COLNAME .)
+    LIKE            reduce using rule 32 (exp -> COLNAME .)
+    EQUAL           reduce using rule 32 (exp -> COLNAME .)
+    NOTEQUAL        reduce using rule 32 (exp -> COLNAME .)
+    BIGGER_EQUAL    reduce using rule 32 (exp -> COLNAME .)
+    BIGGER          reduce using rule 32 (exp -> COLNAME .)
+    SMALLER_EQUAL   reduce using rule 32 (exp -> COLNAME .)
+    SMALLER         reduce using rule 32 (exp -> COLNAME .)
+    AND             reduce using rule 32 (exp -> COLNAME .)
+    OR              reduce using rule 32 (exp -> COLNAME .)
+    $end            reduce using rule 32 (exp -> COLNAME .)
+    SIMICOLON       reduce using rule 32 (exp -> COLNAME .)
+    GROUP           reduce using rule 32 (exp -> COLNAME .)
+    LIMIT           reduce using rule 32 (exp -> COLNAME .)
+    RPAREN          reduce using rule 32 (exp -> COLNAME .)
 
 
 state 46
 
-    (44) select -> SELECT distinct column into FROM DATASOURCE where group order . limit SIMICOLON
-    (72) limit -> . LIMIT NUMBER
-    (73) limit -> . empty
-    (43) empty -> .
+    (33) exp -> expression .
+    (9) expression -> expression . PLUS term
+    (10) expression -> expression . MINUS term
 
-    LIMIT           shift and go to state 74
-    SIMICOLON       reduce using rule 43 (empty -> .)
+    LIKE            reduce using rule 33 (exp -> expression .)
+    EQUAL           reduce using rule 33 (exp -> expression .)
+    NOTEQUAL        reduce using rule 33 (exp -> expression .)
+    BIGGER_EQUAL    reduce using rule 33 (exp -> expression .)
+    BIGGER          reduce using rule 33 (exp -> expression .)
+    SMALLER_EQUAL   reduce using rule 33 (exp -> expression .)
+    SMALLER         reduce using rule 33 (exp -> expression .)
+    AND             reduce using rule 33 (exp -> expression .)
+    OR              reduce using rule 33 (exp -> expression .)
+    $end            reduce using rule 33 (exp -> expression .)
+    SIMICOLON       reduce using rule 33 (exp -> expression .)
+    GROUP           reduce using rule 33 (exp -> expression .)
+    LIMIT           reduce using rule 33 (exp -> expression .)
+    RPAREN          reduce using rule 33 (exp -> expression .)
+    PLUS            shift and go to state 69
+    MINUS           shift and go to state 70
 
-    limit                          shift and go to state 73
-    empty                          shift and go to state 75
 
 state 47
 
-    (65) order -> ORDER . BY orders
+    (11) expression -> term .
+    (12) term -> term . TIMES factor
+    (15) term -> term . DIVIDE factor
 
-    BY              shift and go to state 76
+    PLUS            reduce using rule 11 (expression -> term .)
+    MINUS           reduce using rule 11 (expression -> term .)
+    LIKE            reduce using rule 11 (expression -> term .)
+    EQUAL           reduce using rule 11 (expression -> term .)
+    NOTEQUAL        reduce using rule 11 (expression -> term .)
+    BIGGER_EQUAL    reduce using rule 11 (expression -> term .)
+    BIGGER          reduce using rule 11 (expression -> term .)
+    SMALLER_EQUAL   reduce using rule 11 (expression -> term .)
+    SMALLER         reduce using rule 11 (expression -> term .)
+    RPAREN          reduce using rule 11 (expression -> term .)
+    AND             reduce using rule 11 (expression -> term .)
+    OR              reduce using rule 11 (expression -> term .)
+    $end            reduce using rule 11 (expression -> term .)
+    SIMICOLON       reduce using rule 11 (expression -> term .)
+    GROUP           reduce using rule 11 (expression -> term .)
+    LIMIT           reduce using rule 11 (expression -> term .)
+    TIMES           shift and go to state 71
+    DIVIDE          shift and go to state 72
 
 
 state 48
 
-    (66) order -> empty .
+    (13) term -> factor .
 
-    LIMIT           reduce using rule 66 (order -> empty .)
-    SIMICOLON       reduce using rule 66 (order -> empty .)
+    TIMES           reduce using rule 13 (term -> factor .)
+    DIVIDE          reduce using rule 13 (term -> factor .)
+    PLUS            reduce using rule 13 (term -> factor .)
+    MINUS           reduce using rule 13 (term -> factor .)
+    LIKE            reduce using rule 13 (term -> factor .)
+    EQUAL           reduce using rule 13 (term -> factor .)
+    NOTEQUAL        reduce using rule 13 (term -> factor .)
+    BIGGER_EQUAL    reduce using rule 13 (term -> factor .)
+    BIGGER          reduce using rule 13 (term -> factor .)
+    SMALLER_EQUAL   reduce using rule 13 (term -> factor .)
+    SMALLER         reduce using rule 13 (term -> factor .)
+    RPAREN          reduce using rule 13 (term -> factor .)
+    AND             reduce using rule 13 (term -> factor .)
+    OR              reduce using rule 13 (term -> factor .)
+    $end            reduce using rule 13 (term -> factor .)
+    SIMICOLON       reduce using rule 13 (term -> factor .)
+    GROUP           reduce using rule 13 (term -> factor .)
+    LIMIT           reduce using rule 13 (term -> factor .)
 
 
 state 49
 
-    (61) group -> GROUP BY . column having
-    (47) column -> . TIMES
-    (48) column -> . COLNAME
-    (49) column -> . aggregatefun
-    (50) column -> . column COMMA COLNAME
-    (51) aggregatefun -> . aggregatename LPAREN distinct column RPAREN
-    (52) aggregatename -> . COUNT
-    (53) aggregatename -> . MAX
-    (54) aggregatename -> . MIN
-    (55) aggregatename -> . SUM
-    (56) aggregatename -> . AVG
+    (14) factor -> NUMBER .
 
-    TIMES           shift and go to state 7
-    COLNAME         shift and go to state 8
-    COUNT           shift and go to state 11
-    MAX             shift and go to state 12
-    MIN             shift and go to state 13
-    SUM             shift and go to state 14
-    AVG             shift and go to state 15
+    TIMES           reduce using rule 14 (factor -> NUMBER .)
+    DIVIDE          reduce using rule 14 (factor -> NUMBER .)
+    PLUS            reduce using rule 14 (factor -> NUMBER .)
+    MINUS           reduce using rule 14 (factor -> NUMBER .)
+    LIKE            reduce using rule 14 (factor -> NUMBER .)
+    EQUAL           reduce using rule 14 (factor -> NUMBER .)
+    NOTEQUAL        reduce using rule 14 (factor -> NUMBER .)
+    BIGGER_EQUAL    reduce using rule 14 (factor -> NUMBER .)
+    BIGGER          reduce using rule 14 (factor -> NUMBER .)
+    SMALLER_EQUAL   reduce using rule 14 (factor -> NUMBER .)
+    SMALLER         reduce using rule 14 (factor -> NUMBER .)
+    RPAREN          reduce using rule 14 (factor -> NUMBER .)
+    AND             reduce using rule 14 (factor -> NUMBER .)
+    OR              reduce using rule 14 (factor -> NUMBER .)
+    $end            reduce using rule 14 (factor -> NUMBER .)
+    SIMICOLON       reduce using rule 14 (factor -> NUMBER .)
+    GROUP           reduce using rule 14 (factor -> NUMBER .)
+    LIMIT           reduce using rule 14 (factor -> NUMBER .)
 
-    column                         shift and go to state 77
-    aggregatefun                   shift and go to state 9
-    aggregatename                  shift and go to state 10
 
 state 50
 
-    (17) cond -> cond AND . cond
-    (11) cond -> . exp op exp
-    (12) cond -> . exp BETWEEN exp AND exp
-    (13) cond -> . exp IN tuple
-    (14) cond -> . exp is
-    (15) cond -> . exp LIKE STRING
-    (16) cond -> . EXISTS LPAREN select RPAREN
-    (17) cond -> . cond AND cond
-    (18) cond -> . cond OR cond
-    (19) cond -> . NOT cond
-    (20) cond -> . LPAREN cond RPAREN
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE into . where group order limit SIMICOLON
+    (23) where -> . WHERE conditions
+    (24) where -> . empty
+    (5) empty -> .
 
-    EXISTS          shift and go to state 41
-    NOT             shift and go to state 43
-    LPAREN          shift and go to state 42
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    WHERE           shift and go to state 32
+    GROUP           reduce using rule 5 (empty -> .)
+    LIMIT           reduce using rule 5 (empty -> .)
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
-    cond                           shift and go to state 78
-    exp                            shift and go to state 39
+    where                          shift and go to state 73
+    empty                          shift and go to state 33
 
 state 51
 
-    (18) cond -> cond OR . cond
-    (11) cond -> . exp op exp
-    (12) cond -> . exp BETWEEN exp AND exp
-    (13) cond -> . exp IN tuple
-    (14) cond -> . exp is
-    (15) cond -> . exp LIKE STRING
-    (16) cond -> . EXISTS LPAREN select RPAREN
-    (17) cond -> . cond AND cond
-    (18) cond -> . cond OR cond
-    (19) cond -> . NOT cond
-    (20) cond -> . LPAREN cond RPAREN
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (40) into -> INTO . DATASOURCE
 
-    EXISTS          shift and go to state 41
-    NOT             shift and go to state 43
-    LPAREN          shift and go to state 42
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    DATASOURCE      shift and go to state 74
 
-    cond                           shift and go to state 79
-    exp                            shift and go to state 39
 
 state 52
 
-    (11) cond -> exp op . exp
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (41) into -> empty .
 
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    WHERE           reduce using rule 41 (into -> empty .)
+    GROUP           reduce using rule 41 (into -> empty .)
+    LIMIT           reduce using rule 41 (into -> empty .)
+    SIMICOLON       reduce using rule 41 (into -> empty .)
 
-    exp                            shift and go to state 80
 
 state 53
 
-    (12) cond -> exp BETWEEN . exp AND exp
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (7) insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN . values RPAREN SIMICOLON
+    (55) values -> . STRING
+    (56) values -> . NUMBER
+    (57) values -> . values COMMA values
 
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    STRING          shift and go to state 76
+    NUMBER          shift and go to state 77
 
-    exp                            shift and go to state 81
+    values                         shift and go to state 75
 
 state 54
 
-    (13) cond -> exp IN . tuple
-    (38) tuple -> . select
-    (39) tuple -> . exps
-    (40) tuple -> . empty
-    (44) select -> . SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON
-    (25) exps -> . exp
-    (26) exps -> . exp COMMA exps
-    (43) empty -> .
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (8) insert -> INSERT INTO DATASOURCE LPAREN select RPAREN . SIMICOLON
 
-    SELECT          shift and go to state 2
-    AND             reduce using rule 43 (empty -> .)
-    OR              reduce using rule 43 (empty -> .)
-    GROUP           reduce using rule 43 (empty -> .)
-    ORDER           reduce using rule 43 (empty -> .)
-    LIMIT           reduce using rule 43 (empty -> .)
-    SIMICOLON       reduce using rule 43 (empty -> .)
-    RPAREN          reduce using rule 43 (empty -> .)
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    SIMICOLON       shift and go to state 78
 
-    exp                            shift and go to state 82
-    tuple                          shift and go to state 83
-    select                         shift and go to state 84
-    exps                           shift and go to state 85
-    empty                          shift and go to state 86
 
 state 55
 
-    (14) cond -> exp is .
+    (59) update -> UPDATE DATASOURCE SET assigns where SIMICOLON .
 
-    AND             reduce using rule 14 (cond -> exp is .)
-    OR              reduce using rule 14 (cond -> exp is .)
-    GROUP           reduce using rule 14 (cond -> exp is .)
-    ORDER           reduce using rule 14 (cond -> exp is .)
-    LIMIT           reduce using rule 14 (cond -> exp is .)
-    SIMICOLON       reduce using rule 14 (cond -> exp is .)
-    RPAREN          reduce using rule 14 (cond -> exp is .)
+    $end            reduce using rule 59 (update -> UPDATE DATASOURCE SET assigns where SIMICOLON .)
 
 
 state 56
 
-    (15) cond -> exp LIKE . STRING
+    (26) conditions -> conditions AND . conditions
+    (25) conditions -> . LPAREN conditions RPAREN
+    (26) conditions -> . conditions AND conditions
+    (27) conditions -> . conditions OR conditions
+    (28) conditions -> . exp LIKE STRING
+    (29) conditions -> . exp logical exp
+    (30) conditions -> . NOT conditions
+    (31) exp -> . STRING
+    (32) exp -> . COLNAME
+    (33) exp -> . expression
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    STRING          shift and go to state 87
+    LPAREN          shift and go to state 41
+    NOT             shift and go to state 44
+    STRING          shift and go to state 43
+    COLNAME         shift and go to state 45
+    NUMBER          shift and go to state 49
 
+    conditions                     shift and go to state 79
+    exp                            shift and go to state 42
+    expression                     shift and go to state 46
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 57
 
-    (24) exp -> exp aop . exp
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (27) conditions -> conditions OR . conditions
+    (25) conditions -> . LPAREN conditions RPAREN
+    (26) conditions -> . conditions AND conditions
+    (27) conditions -> . conditions OR conditions
+    (28) conditions -> . exp LIKE STRING
+    (29) conditions -> . exp logical exp
+    (30) conditions -> . NOT conditions
+    (31) exp -> . STRING
+    (32) exp -> . COLNAME
+    (33) exp -> . expression
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
+    LPAREN          shift and go to state 41
+    NOT             shift and go to state 44
+    STRING          shift and go to state 43
     COLNAME         shift and go to state 45
+    NUMBER          shift and go to state 49
 
-    exp                            shift and go to state 88
+    conditions                     shift and go to state 80
+    exp                            shift and go to state 42
+    expression                     shift and go to state 46
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 58
 
-    (27) op -> EQUAL .
+    (25) conditions -> LPAREN conditions . RPAREN
+    (26) conditions -> conditions . AND conditions
+    (27) conditions -> conditions . OR conditions
 
-    STRING          reduce using rule 27 (op -> EQUAL .)
-    NUMBER          reduce using rule 27 (op -> EQUAL .)
-    COLNAME         reduce using rule 27 (op -> EQUAL .)
+    RPAREN          shift and go to state 81
+    AND             shift and go to state 56
+    OR              shift and go to state 57
 
 
 state 59
 
-    (28) op -> BIGGER_THAN .
+    (16) factor -> LPAREN expression . RPAREN
+    (9) expression -> expression . PLUS term
+    (10) expression -> expression . MINUS term
+    (33) exp -> expression .
 
-    STRING          reduce using rule 28 (op -> BIGGER_THAN .)
-    NUMBER          reduce using rule 28 (op -> BIGGER_THAN .)
-    COLNAME         reduce using rule 28 (op -> BIGGER_THAN .)
+    RPAREN          shift and go to state 82
+    PLUS            shift and go to state 69
+    MINUS           shift and go to state 70
+    LIKE            reduce using rule 33 (exp -> expression .)
+    EQUAL           reduce using rule 33 (exp -> expression .)
+    NOTEQUAL        reduce using rule 33 (exp -> expression .)
+    BIGGER_EQUAL    reduce using rule 33 (exp -> expression .)
+    BIGGER          reduce using rule 33 (exp -> expression .)
+    SMALLER_EQUAL   reduce using rule 33 (exp -> expression .)
+    SMALLER         reduce using rule 33 (exp -> expression .)
 
 
 state 60
 
-    (29) op -> SMALLER_THAN .
+    (28) conditions -> exp LIKE . STRING
 
-    STRING          reduce using rule 29 (op -> SMALLER_THAN .)
-    NUMBER          reduce using rule 29 (op -> SMALLER_THAN .)
-    COLNAME         reduce using rule 29 (op -> SMALLER_THAN .)
+    STRING          shift and go to state 83
 
 
 state 61
 
-    (30) op -> NOTEQUAL .
+    (29) conditions -> exp logical . exp
+    (31) exp -> . STRING
+    (32) exp -> . COLNAME
+    (33) exp -> . expression
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    STRING          reduce using rule 30 (op -> NOTEQUAL .)
-    NUMBER          reduce using rule 30 (op -> NOTEQUAL .)
-    COLNAME         reduce using rule 30 (op -> NOTEQUAL .)
+    STRING          shift and go to state 43
+    COLNAME         shift and go to state 45
+    NUMBER          shift and go to state 49
+    LPAREN          shift and go to state 85
 
+    exp                            shift and go to state 84
+    expression                     shift and go to state 46
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 62
 
-    (31) op -> BIGGER_THAN_OR_EQUAL_TO .
+    (17) logical -> EQUAL .
 
-    STRING          reduce using rule 31 (op -> BIGGER_THAN_OR_EQUAL_TO .)
-    NUMBER          reduce using rule 31 (op -> BIGGER_THAN_OR_EQUAL_TO .)
-    COLNAME         reduce using rule 31 (op -> BIGGER_THAN_OR_EQUAL_TO .)
+    STRING          reduce using rule 17 (logical -> EQUAL .)
+    COLNAME         reduce using rule 17 (logical -> EQUAL .)
+    NUMBER          reduce using rule 17 (logical -> EQUAL .)
+    LPAREN          reduce using rule 17 (logical -> EQUAL .)
 
 
 state 63
 
-    (32) op -> SMALLER_THAN_OR_EQUAL_TO .
+    (18) logical -> NOTEQUAL .
 
-    STRING          reduce using rule 32 (op -> SMALLER_THAN_OR_EQUAL_TO .)
-    NUMBER          reduce using rule 32 (op -> SMALLER_THAN_OR_EQUAL_TO .)
-    COLNAME         reduce using rule 32 (op -> SMALLER_THAN_OR_EQUAL_TO .)
+    STRING          reduce using rule 18 (logical -> NOTEQUAL .)
+    COLNAME         reduce using rule 18 (logical -> NOTEQUAL .)
+    NUMBER          reduce using rule 18 (logical -> NOTEQUAL .)
+    LPAREN          reduce using rule 18 (logical -> NOTEQUAL .)
 
 
 state 64
 
-    (41) is -> IS . NULL
-    (42) is -> IS . NOT NULL
+    (19) logical -> BIGGER_EQUAL .
 
-    NULL            shift and go to state 89
-    NOT             shift and go to state 90
+    STRING          reduce using rule 19 (logical -> BIGGER_EQUAL .)
+    COLNAME         reduce using rule 19 (logical -> BIGGER_EQUAL .)
+    NUMBER          reduce using rule 19 (logical -> BIGGER_EQUAL .)
+    LPAREN          reduce using rule 19 (logical -> BIGGER_EQUAL .)
 
 
 state 65
 
-    (33) aop -> PLUS .
+    (20) logical -> BIGGER .
 
-    STRING          reduce using rule 33 (aop -> PLUS .)
-    NUMBER          reduce using rule 33 (aop -> PLUS .)
-    COLNAME         reduce using rule 33 (aop -> PLUS .)
+    STRING          reduce using rule 20 (logical -> BIGGER .)
+    COLNAME         reduce using rule 20 (logical -> BIGGER .)
+    NUMBER          reduce using rule 20 (logical -> BIGGER .)
+    LPAREN          reduce using rule 20 (logical -> BIGGER .)
 
 
 state 66
 
-    (34) aop -> MINUS .
+    (21) logical -> SMALLER_EQUAL .
 
-    STRING          reduce using rule 34 (aop -> MINUS .)
-    NUMBER          reduce using rule 34 (aop -> MINUS .)
-    COLNAME         reduce using rule 34 (aop -> MINUS .)
+    STRING          reduce using rule 21 (logical -> SMALLER_EQUAL .)
+    COLNAME         reduce using rule 21 (logical -> SMALLER_EQUAL .)
+    NUMBER          reduce using rule 21 (logical -> SMALLER_EQUAL .)
+    LPAREN          reduce using rule 21 (logical -> SMALLER_EQUAL .)
 
 
 state 67
 
-    (35) aop -> TIMES .
+    (22) logical -> SMALLER .
 
-    STRING          reduce using rule 35 (aop -> TIMES .)
-    NUMBER          reduce using rule 35 (aop -> TIMES .)
-    COLNAME         reduce using rule 35 (aop -> TIMES .)
+    STRING          reduce using rule 22 (logical -> SMALLER .)
+    COLNAME         reduce using rule 22 (logical -> SMALLER .)
+    NUMBER          reduce using rule 22 (logical -> SMALLER .)
+    LPAREN          reduce using rule 22 (logical -> SMALLER .)
 
 
 state 68
 
-    (36) aop -> DIVIDE .
+    (30) conditions -> NOT conditions .
+    (26) conditions -> conditions . AND conditions
+    (27) conditions -> conditions . OR conditions
 
-    STRING          reduce using rule 36 (aop -> DIVIDE .)
-    NUMBER          reduce using rule 36 (aop -> DIVIDE .)
-    COLNAME         reduce using rule 36 (aop -> DIVIDE .)
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+    $end            reduce using rule 30 (conditions -> NOT conditions .)
+    SIMICOLON       reduce using rule 30 (conditions -> NOT conditions .)
+    GROUP           reduce using rule 30 (conditions -> NOT conditions .)
+    LIMIT           reduce using rule 30 (conditions -> NOT conditions .)
+    RPAREN          reduce using rule 30 (conditions -> NOT conditions .)
+    AND             shift and go to state 56
+    OR              shift and go to state 57
+
+  ! AND             [ reduce using rule 30 (conditions -> NOT conditions .) ]
+  ! OR              [ reduce using rule 30 (conditions -> NOT conditions .) ]
 
 
 state 69
 
-    (37) aop -> PERCENT .
+    (9) expression -> expression PLUS . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    STRING          reduce using rule 37 (aop -> PERCENT .)
-    NUMBER          reduce using rule 37 (aop -> PERCENT .)
-    COLNAME         reduce using rule 37 (aop -> PERCENT .)
+    NUMBER          shift and go to state 49
+    LPAREN          shift and go to state 85
 
+    term                           shift and go to state 86
+    factor                         shift and go to state 48
 
 state 70
 
-    (16) cond -> EXISTS LPAREN . select RPAREN
-    (44) select -> . SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON
+    (10) expression -> expression MINUS . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    SELECT          shift and go to state 2
+    NUMBER          shift and go to state 49
+    LPAREN          shift and go to state 85
 
-    select                         shift and go to state 91
+    term                           shift and go to state 87
+    factor                         shift and go to state 48
 
 state 71
 
-    (20) cond -> LPAREN cond . RPAREN
-    (17) cond -> cond . AND cond
-    (18) cond -> cond . OR cond
+    (12) term -> term TIMES . factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    RPAREN          shift and go to state 92
-    AND             shift and go to state 50
-    OR              shift and go to state 51
+    NUMBER          shift and go to state 49
+    LPAREN          shift and go to state 85
 
+    factor                         shift and go to state 88
 
 state 72
 
-    (19) cond -> NOT cond .
-    (17) cond -> cond . AND cond
-    (18) cond -> cond . OR cond
+    (15) term -> term DIVIDE . factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    GROUP           reduce using rule 19 (cond -> NOT cond .)
-    ORDER           reduce using rule 19 (cond -> NOT cond .)
-    LIMIT           reduce using rule 19 (cond -> NOT cond .)
-    SIMICOLON       reduce using rule 19 (cond -> NOT cond .)
-    RPAREN          reduce using rule 19 (cond -> NOT cond .)
-    AND             shift and go to state 50
-    OR              shift and go to state 51
+    NUMBER          shift and go to state 49
+    LPAREN          shift and go to state 85
 
-  ! AND             [ reduce using rule 19 (cond -> NOT cond .) ]
-  ! OR              [ reduce using rule 19 (cond -> NOT cond .) ]
-
+    factor                         shift and go to state 89
 
 state 73
 
-    (44) select -> SELECT distinct column into FROM DATASOURCE where group order limit . SIMICOLON
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE into where . group order limit SIMICOLON
+    (42) group -> . GROUP BY db_column
+    (43) group -> . empty
+    (5) empty -> .
 
-    SIMICOLON       shift and go to state 93
+    GROUP           shift and go to state 91
+    LIMIT           reduce using rule 5 (empty -> .)
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
+    group                          shift and go to state 90
+    empty                          shift and go to state 92
 
 state 74
 
-    (72) limit -> LIMIT . NUMBER
+    (40) into -> INTO DATASOURCE .
 
-    NUMBER          shift and go to state 94
+    WHERE           reduce using rule 40 (into -> INTO DATASOURCE .)
+    GROUP           reduce using rule 40 (into -> INTO DATASOURCE .)
+    LIMIT           reduce using rule 40 (into -> INTO DATASOURCE .)
+    SIMICOLON       reduce using rule 40 (into -> INTO DATASOURCE .)
 
 
 state 75
 
-    (73) limit -> empty .
+    (7) insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN values . RPAREN SIMICOLON
+    (57) values -> values . COMMA values
 
-    SIMICOLON       reduce using rule 73 (limit -> empty .)
+    RPAREN          shift and go to state 93
+    COMMA           shift and go to state 94
 
 
 state 76
 
-    (65) order -> ORDER BY . orders
-    (67) orders -> . column way
-    (68) orders -> . orders COMMA orders
-    (47) column -> . TIMES
-    (48) column -> . COLNAME
-    (49) column -> . aggregatefun
-    (50) column -> . column COMMA COLNAME
-    (51) aggregatefun -> . aggregatename LPAREN distinct column RPAREN
-    (52) aggregatename -> . COUNT
-    (53) aggregatename -> . MAX
-    (54) aggregatename -> . MIN
-    (55) aggregatename -> . SUM
-    (56) aggregatename -> . AVG
+    (55) values -> STRING .
 
-    TIMES           shift and go to state 7
-    COLNAME         shift and go to state 8
-    COUNT           shift and go to state 11
-    MAX             shift and go to state 12
-    MIN             shift and go to state 13
-    SUM             shift and go to state 14
-    AVG             shift and go to state 15
+    RPAREN          reduce using rule 55 (values -> STRING .)
+    COMMA           reduce using rule 55 (values -> STRING .)
 
-    orders                         shift and go to state 95
-    column                         shift and go to state 96
-    aggregatefun                   shift and go to state 9
-    aggregatename                  shift and go to state 10
 
 state 77
 
-    (61) group -> GROUP BY column . having
-    (50) column -> column . COMMA COLNAME
-    (63) having -> . HAVING cond
-    (64) having -> . empty
-    (43) empty -> .
+    (56) values -> NUMBER .
 
-    COMMA           shift and go to state 17
-    HAVING          shift and go to state 98
-    ORDER           reduce using rule 43 (empty -> .)
-    LIMIT           reduce using rule 43 (empty -> .)
-    SIMICOLON       reduce using rule 43 (empty -> .)
+    RPAREN          reduce using rule 56 (values -> NUMBER .)
+    COMMA           reduce using rule 56 (values -> NUMBER .)
 
-    having                         shift and go to state 97
-    empty                          shift and go to state 99
 
 state 78
 
-    (17) cond -> cond AND cond .
-    (17) cond -> cond . AND cond
-    (18) cond -> cond . OR cond
+    (8) insert -> INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON .
 
-  ! shift/reduce conflict for AND resolved as shift
-  ! shift/reduce conflict for OR resolved as shift
-    GROUP           reduce using rule 17 (cond -> cond AND cond .)
-    ORDER           reduce using rule 17 (cond -> cond AND cond .)
-    LIMIT           reduce using rule 17 (cond -> cond AND cond .)
-    SIMICOLON       reduce using rule 17 (cond -> cond AND cond .)
-    RPAREN          reduce using rule 17 (cond -> cond AND cond .)
-    AND             shift and go to state 50
-    OR              shift and go to state 51
-
-  ! AND             [ reduce using rule 17 (cond -> cond AND cond .) ]
-  ! OR              [ reduce using rule 17 (cond -> cond AND cond .) ]
+    $end            reduce using rule 8 (insert -> INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON .)
 
 
 state 79
 
-    (18) cond -> cond OR cond .
-    (17) cond -> cond . AND cond
-    (18) cond -> cond . OR cond
+    (26) conditions -> conditions AND conditions .
+    (26) conditions -> conditions . AND conditions
+    (27) conditions -> conditions . OR conditions
 
   ! shift/reduce conflict for AND resolved as shift
   ! shift/reduce conflict for OR resolved as shift
-    GROUP           reduce using rule 18 (cond -> cond OR cond .)
-    ORDER           reduce using rule 18 (cond -> cond OR cond .)
-    LIMIT           reduce using rule 18 (cond -> cond OR cond .)
-    SIMICOLON       reduce using rule 18 (cond -> cond OR cond .)
-    RPAREN          reduce using rule 18 (cond -> cond OR cond .)
-    AND             shift and go to state 50
-    OR              shift and go to state 51
+    $end            reduce using rule 26 (conditions -> conditions AND conditions .)
+    SIMICOLON       reduce using rule 26 (conditions -> conditions AND conditions .)
+    GROUP           reduce using rule 26 (conditions -> conditions AND conditions .)
+    LIMIT           reduce using rule 26 (conditions -> conditions AND conditions .)
+    RPAREN          reduce using rule 26 (conditions -> conditions AND conditions .)
+    AND             shift and go to state 56
+    OR              shift and go to state 57
 
-  ! AND             [ reduce using rule 18 (cond -> cond OR cond .) ]
-  ! OR              [ reduce using rule 18 (cond -> cond OR cond .) ]
+  ! AND             [ reduce using rule 26 (conditions -> conditions AND conditions .) ]
+  ! OR              [ reduce using rule 26 (conditions -> conditions AND conditions .) ]
 
 
 state 80
 
-    (11) cond -> exp op exp .
-    (24) exp -> exp . aop exp
-    (33) aop -> . PLUS
-    (34) aop -> . MINUS
-    (35) aop -> . TIMES
-    (36) aop -> . DIVIDE
-    (37) aop -> . PERCENT
+    (27) conditions -> conditions OR conditions .
+    (26) conditions -> conditions . AND conditions
+    (27) conditions -> conditions . OR conditions
 
-    AND             reduce using rule 11 (cond -> exp op exp .)
-    OR              reduce using rule 11 (cond -> exp op exp .)
-    GROUP           reduce using rule 11 (cond -> exp op exp .)
-    ORDER           reduce using rule 11 (cond -> exp op exp .)
-    LIMIT           reduce using rule 11 (cond -> exp op exp .)
-    SIMICOLON       reduce using rule 11 (cond -> exp op exp .)
-    RPAREN          reduce using rule 11 (cond -> exp op exp .)
-    PLUS            shift and go to state 65
-    MINUS           shift and go to state 66
-    TIMES           shift and go to state 67
-    DIVIDE          shift and go to state 68
-    PERCENT         shift and go to state 69
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+    $end            reduce using rule 27 (conditions -> conditions OR conditions .)
+    SIMICOLON       reduce using rule 27 (conditions -> conditions OR conditions .)
+    GROUP           reduce using rule 27 (conditions -> conditions OR conditions .)
+    LIMIT           reduce using rule 27 (conditions -> conditions OR conditions .)
+    RPAREN          reduce using rule 27 (conditions -> conditions OR conditions .)
+    AND             shift and go to state 56
+    OR              shift and go to state 57
 
-    aop                            shift and go to state 57
+  ! AND             [ reduce using rule 27 (conditions -> conditions OR conditions .) ]
+  ! OR              [ reduce using rule 27 (conditions -> conditions OR conditions .) ]
+
 
 state 81
 
-    (12) cond -> exp BETWEEN exp . AND exp
-    (24) exp -> exp . aop exp
-    (33) aop -> . PLUS
-    (34) aop -> . MINUS
-    (35) aop -> . TIMES
-    (36) aop -> . DIVIDE
-    (37) aop -> . PERCENT
+    (25) conditions -> LPAREN conditions RPAREN .
 
-    AND             shift and go to state 100
-    PLUS            shift and go to state 65
-    MINUS           shift and go to state 66
-    TIMES           shift and go to state 67
-    DIVIDE          shift and go to state 68
-    PERCENT         shift and go to state 69
+    AND             reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
+    OR              reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
+    $end            reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
+    SIMICOLON       reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
+    GROUP           reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
+    LIMIT           reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
+    RPAREN          reduce using rule 25 (conditions -> LPAREN conditions RPAREN .)
 
-    aop                            shift and go to state 57
 
 state 82
 
-    (25) exps -> exp .
-    (26) exps -> exp . COMMA exps
-    (24) exp -> exp . aop exp
-    (33) aop -> . PLUS
-    (34) aop -> . MINUS
-    (35) aop -> . TIMES
-    (36) aop -> . DIVIDE
-    (37) aop -> . PERCENT
+    (16) factor -> LPAREN expression RPAREN .
 
-    AND             reduce using rule 25 (exps -> exp .)
-    OR              reduce using rule 25 (exps -> exp .)
-    GROUP           reduce using rule 25 (exps -> exp .)
-    ORDER           reduce using rule 25 (exps -> exp .)
-    LIMIT           reduce using rule 25 (exps -> exp .)
-    SIMICOLON       reduce using rule 25 (exps -> exp .)
-    RPAREN          reduce using rule 25 (exps -> exp .)
-    COMMA           shift and go to state 101
-    PLUS            shift and go to state 65
-    MINUS           shift and go to state 66
-    TIMES           shift and go to state 67
-    DIVIDE          shift and go to state 68
-    PERCENT         shift and go to state 69
+    TIMES           reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    DIVIDE          reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    PLUS            reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    MINUS           reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    LIKE            reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    EQUAL           reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    NOTEQUAL        reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    BIGGER_EQUAL    reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    BIGGER          reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    SMALLER_EQUAL   reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    SMALLER         reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    AND             reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    OR              reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    $end            reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    SIMICOLON       reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    GROUP           reduce using rule 16 (factor -> LPAREN expression RPAREN .)
+    LIMIT           reduce using rule 16 (factor -> LPAREN expression RPAREN .)
 
-    aop                            shift and go to state 57
 
 state 83
 
-    (13) cond -> exp IN tuple .
+    (28) conditions -> exp LIKE STRING .
 
-    AND             reduce using rule 13 (cond -> exp IN tuple .)
-    OR              reduce using rule 13 (cond -> exp IN tuple .)
-    GROUP           reduce using rule 13 (cond -> exp IN tuple .)
-    ORDER           reduce using rule 13 (cond -> exp IN tuple .)
-    LIMIT           reduce using rule 13 (cond -> exp IN tuple .)
-    SIMICOLON       reduce using rule 13 (cond -> exp IN tuple .)
-    RPAREN          reduce using rule 13 (cond -> exp IN tuple .)
+    AND             reduce using rule 28 (conditions -> exp LIKE STRING .)
+    OR              reduce using rule 28 (conditions -> exp LIKE STRING .)
+    $end            reduce using rule 28 (conditions -> exp LIKE STRING .)
+    SIMICOLON       reduce using rule 28 (conditions -> exp LIKE STRING .)
+    GROUP           reduce using rule 28 (conditions -> exp LIKE STRING .)
+    LIMIT           reduce using rule 28 (conditions -> exp LIKE STRING .)
+    RPAREN          reduce using rule 28 (conditions -> exp LIKE STRING .)
 
 
 state 84
 
-    (38) tuple -> select .
+    (29) conditions -> exp logical exp .
 
-    AND             reduce using rule 38 (tuple -> select .)
-    OR              reduce using rule 38 (tuple -> select .)
-    GROUP           reduce using rule 38 (tuple -> select .)
-    ORDER           reduce using rule 38 (tuple -> select .)
-    LIMIT           reduce using rule 38 (tuple -> select .)
-    SIMICOLON       reduce using rule 38 (tuple -> select .)
-    RPAREN          reduce using rule 38 (tuple -> select .)
+    AND             reduce using rule 29 (conditions -> exp logical exp .)
+    OR              reduce using rule 29 (conditions -> exp logical exp .)
+    $end            reduce using rule 29 (conditions -> exp logical exp .)
+    SIMICOLON       reduce using rule 29 (conditions -> exp logical exp .)
+    GROUP           reduce using rule 29 (conditions -> exp logical exp .)
+    LIMIT           reduce using rule 29 (conditions -> exp logical exp .)
+    RPAREN          reduce using rule 29 (conditions -> exp logical exp .)
 
 
 state 85
 
-    (39) tuple -> exps .
+    (16) factor -> LPAREN . expression RPAREN
+    (9) expression -> . expression PLUS term
+    (10) expression -> . expression MINUS term
+    (11) expression -> . term
+    (12) term -> . term TIMES factor
+    (13) term -> . factor
+    (15) term -> . term DIVIDE factor
+    (14) factor -> . NUMBER
+    (16) factor -> . LPAREN expression RPAREN
 
-    AND             reduce using rule 39 (tuple -> exps .)
-    OR              reduce using rule 39 (tuple -> exps .)
-    GROUP           reduce using rule 39 (tuple -> exps .)
-    ORDER           reduce using rule 39 (tuple -> exps .)
-    LIMIT           reduce using rule 39 (tuple -> exps .)
-    SIMICOLON       reduce using rule 39 (tuple -> exps .)
-    RPAREN          reduce using rule 39 (tuple -> exps .)
+    NUMBER          shift and go to state 49
+    LPAREN          shift and go to state 85
 
+    expression                     shift and go to state 95
+    term                           shift and go to state 47
+    factor                         shift and go to state 48
 
 state 86
 
-    (40) tuple -> empty .
+    (9) expression -> expression PLUS term .
+    (12) term -> term . TIMES factor
+    (15) term -> term . DIVIDE factor
 
-    AND             reduce using rule 40 (tuple -> empty .)
-    OR              reduce using rule 40 (tuple -> empty .)
-    GROUP           reduce using rule 40 (tuple -> empty .)
-    ORDER           reduce using rule 40 (tuple -> empty .)
-    LIMIT           reduce using rule 40 (tuple -> empty .)
-    SIMICOLON       reduce using rule 40 (tuple -> empty .)
-    RPAREN          reduce using rule 40 (tuple -> empty .)
+    PLUS            reduce using rule 9 (expression -> expression PLUS term .)
+    MINUS           reduce using rule 9 (expression -> expression PLUS term .)
+    LIKE            reduce using rule 9 (expression -> expression PLUS term .)
+    EQUAL           reduce using rule 9 (expression -> expression PLUS term .)
+    NOTEQUAL        reduce using rule 9 (expression -> expression PLUS term .)
+    BIGGER_EQUAL    reduce using rule 9 (expression -> expression PLUS term .)
+    BIGGER          reduce using rule 9 (expression -> expression PLUS term .)
+    SMALLER_EQUAL   reduce using rule 9 (expression -> expression PLUS term .)
+    SMALLER         reduce using rule 9 (expression -> expression PLUS term .)
+    RPAREN          reduce using rule 9 (expression -> expression PLUS term .)
+    AND             reduce using rule 9 (expression -> expression PLUS term .)
+    OR              reduce using rule 9 (expression -> expression PLUS term .)
+    $end            reduce using rule 9 (expression -> expression PLUS term .)
+    SIMICOLON       reduce using rule 9 (expression -> expression PLUS term .)
+    GROUP           reduce using rule 9 (expression -> expression PLUS term .)
+    LIMIT           reduce using rule 9 (expression -> expression PLUS term .)
+    TIMES           shift and go to state 71
+    DIVIDE          shift and go to state 72
 
 
 state 87
 
-    (15) cond -> exp LIKE STRING .
+    (10) expression -> expression MINUS term .
+    (12) term -> term . TIMES factor
+    (15) term -> term . DIVIDE factor
 
-    AND             reduce using rule 15 (cond -> exp LIKE STRING .)
-    OR              reduce using rule 15 (cond -> exp LIKE STRING .)
-    GROUP           reduce using rule 15 (cond -> exp LIKE STRING .)
-    ORDER           reduce using rule 15 (cond -> exp LIKE STRING .)
-    LIMIT           reduce using rule 15 (cond -> exp LIKE STRING .)
-    SIMICOLON       reduce using rule 15 (cond -> exp LIKE STRING .)
-    RPAREN          reduce using rule 15 (cond -> exp LIKE STRING .)
+    PLUS            reduce using rule 10 (expression -> expression MINUS term .)
+    MINUS           reduce using rule 10 (expression -> expression MINUS term .)
+    LIKE            reduce using rule 10 (expression -> expression MINUS term .)
+    EQUAL           reduce using rule 10 (expression -> expression MINUS term .)
+    NOTEQUAL        reduce using rule 10 (expression -> expression MINUS term .)
+    BIGGER_EQUAL    reduce using rule 10 (expression -> expression MINUS term .)
+    BIGGER          reduce using rule 10 (expression -> expression MINUS term .)
+    SMALLER_EQUAL   reduce using rule 10 (expression -> expression MINUS term .)
+    SMALLER         reduce using rule 10 (expression -> expression MINUS term .)
+    RPAREN          reduce using rule 10 (expression -> expression MINUS term .)
+    AND             reduce using rule 10 (expression -> expression MINUS term .)
+    OR              reduce using rule 10 (expression -> expression MINUS term .)
+    $end            reduce using rule 10 (expression -> expression MINUS term .)
+    SIMICOLON       reduce using rule 10 (expression -> expression MINUS term .)
+    GROUP           reduce using rule 10 (expression -> expression MINUS term .)
+    LIMIT           reduce using rule 10 (expression -> expression MINUS term .)
+    TIMES           shift and go to state 71
+    DIVIDE          shift and go to state 72
 
 
 state 88
 
-    (24) exp -> exp aop exp .
-    (24) exp -> exp . aop exp
-    (33) aop -> . PLUS
-    (34) aop -> . MINUS
-    (35) aop -> . TIMES
-    (36) aop -> . DIVIDE
-    (37) aop -> . PERCENT
+    (12) term -> term TIMES factor .
 
-  ! shift/reduce conflict for PLUS resolved as shift
-  ! shift/reduce conflict for MINUS resolved as shift
-  ! shift/reduce conflict for TIMES resolved as shift
-  ! shift/reduce conflict for DIVIDE resolved as shift
-  ! shift/reduce conflict for PERCENT resolved as shift
-    BETWEEN         reduce using rule 24 (exp -> exp aop exp .)
-    IN              reduce using rule 24 (exp -> exp aop exp .)
-    LIKE            reduce using rule 24 (exp -> exp aop exp .)
-    EQUAL           reduce using rule 24 (exp -> exp aop exp .)
-    BIGGER_THAN     reduce using rule 24 (exp -> exp aop exp .)
-    SMALLER_THAN    reduce using rule 24 (exp -> exp aop exp .)
-    NOTEQUAL        reduce using rule 24 (exp -> exp aop exp .)
-    BIGGER_THAN_OR_EQUAL_TO reduce using rule 24 (exp -> exp aop exp .)
-    SMALLER_THAN_OR_EQUAL_TO reduce using rule 24 (exp -> exp aop exp .)
-    IS              reduce using rule 24 (exp -> exp aop exp .)
-    AND             reduce using rule 24 (exp -> exp aop exp .)
-    OR              reduce using rule 24 (exp -> exp aop exp .)
-    GROUP           reduce using rule 24 (exp -> exp aop exp .)
-    ORDER           reduce using rule 24 (exp -> exp aop exp .)
-    LIMIT           reduce using rule 24 (exp -> exp aop exp .)
-    SIMICOLON       reduce using rule 24 (exp -> exp aop exp .)
-    RPAREN          reduce using rule 24 (exp -> exp aop exp .)
-    COMMA           reduce using rule 24 (exp -> exp aop exp .)
-    PLUS            shift and go to state 65
-    MINUS           shift and go to state 66
-    TIMES           shift and go to state 67
-    DIVIDE          shift and go to state 68
-    PERCENT         shift and go to state 69
+    TIMES           reduce using rule 12 (term -> term TIMES factor .)
+    DIVIDE          reduce using rule 12 (term -> term TIMES factor .)
+    PLUS            reduce using rule 12 (term -> term TIMES factor .)
+    MINUS           reduce using rule 12 (term -> term TIMES factor .)
+    LIKE            reduce using rule 12 (term -> term TIMES factor .)
+    EQUAL           reduce using rule 12 (term -> term TIMES factor .)
+    NOTEQUAL        reduce using rule 12 (term -> term TIMES factor .)
+    BIGGER_EQUAL    reduce using rule 12 (term -> term TIMES factor .)
+    BIGGER          reduce using rule 12 (term -> term TIMES factor .)
+    SMALLER_EQUAL   reduce using rule 12 (term -> term TIMES factor .)
+    SMALLER         reduce using rule 12 (term -> term TIMES factor .)
+    RPAREN          reduce using rule 12 (term -> term TIMES factor .)
+    AND             reduce using rule 12 (term -> term TIMES factor .)
+    OR              reduce using rule 12 (term -> term TIMES factor .)
+    $end            reduce using rule 12 (term -> term TIMES factor .)
+    SIMICOLON       reduce using rule 12 (term -> term TIMES factor .)
+    GROUP           reduce using rule 12 (term -> term TIMES factor .)
+    LIMIT           reduce using rule 12 (term -> term TIMES factor .)
 
-  ! PLUS            [ reduce using rule 24 (exp -> exp aop exp .) ]
-  ! MINUS           [ reduce using rule 24 (exp -> exp aop exp .) ]
-  ! TIMES           [ reduce using rule 24 (exp -> exp aop exp .) ]
-  ! DIVIDE          [ reduce using rule 24 (exp -> exp aop exp .) ]
-  ! PERCENT         [ reduce using rule 24 (exp -> exp aop exp .) ]
-
-    aop                            shift and go to state 57
 
 state 89
 
-    (41) is -> IS NULL .
+    (15) term -> term DIVIDE factor .
 
-    AND             reduce using rule 41 (is -> IS NULL .)
-    OR              reduce using rule 41 (is -> IS NULL .)
-    GROUP           reduce using rule 41 (is -> IS NULL .)
-    ORDER           reduce using rule 41 (is -> IS NULL .)
-    LIMIT           reduce using rule 41 (is -> IS NULL .)
-    SIMICOLON       reduce using rule 41 (is -> IS NULL .)
-    RPAREN          reduce using rule 41 (is -> IS NULL .)
+    TIMES           reduce using rule 15 (term -> term DIVIDE factor .)
+    DIVIDE          reduce using rule 15 (term -> term DIVIDE factor .)
+    PLUS            reduce using rule 15 (term -> term DIVIDE factor .)
+    MINUS           reduce using rule 15 (term -> term DIVIDE factor .)
+    LIKE            reduce using rule 15 (term -> term DIVIDE factor .)
+    EQUAL           reduce using rule 15 (term -> term DIVIDE factor .)
+    NOTEQUAL        reduce using rule 15 (term -> term DIVIDE factor .)
+    BIGGER_EQUAL    reduce using rule 15 (term -> term DIVIDE factor .)
+    BIGGER          reduce using rule 15 (term -> term DIVIDE factor .)
+    SMALLER_EQUAL   reduce using rule 15 (term -> term DIVIDE factor .)
+    SMALLER         reduce using rule 15 (term -> term DIVIDE factor .)
+    RPAREN          reduce using rule 15 (term -> term DIVIDE factor .)
+    AND             reduce using rule 15 (term -> term DIVIDE factor .)
+    OR              reduce using rule 15 (term -> term DIVIDE factor .)
+    $end            reduce using rule 15 (term -> term DIVIDE factor .)
+    SIMICOLON       reduce using rule 15 (term -> term DIVIDE factor .)
+    GROUP           reduce using rule 15 (term -> term DIVIDE factor .)
+    LIMIT           reduce using rule 15 (term -> term DIVIDE factor .)
 
 
 state 90
 
-    (42) is -> IS NOT . NULL
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE into where group . order limit SIMICOLON
+    (49) order -> . empty
+    (5) empty -> .
 
-    NULL            shift and go to state 102
+    LIMIT           reduce using rule 5 (empty -> .)
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
+    order                          shift and go to state 96
+    empty                          shift and go to state 97
 
 state 91
 
-    (16) cond -> EXISTS LPAREN select . RPAREN
+    (42) group -> GROUP . BY db_column
 
-    RPAREN          shift and go to state 103
+    BY              shift and go to state 98
 
 
 state 92
 
-    (20) cond -> LPAREN cond RPAREN .
+    (43) group -> empty .
 
-    AND             reduce using rule 20 (cond -> LPAREN cond RPAREN .)
-    OR              reduce using rule 20 (cond -> LPAREN cond RPAREN .)
-    GROUP           reduce using rule 20 (cond -> LPAREN cond RPAREN .)
-    ORDER           reduce using rule 20 (cond -> LPAREN cond RPAREN .)
-    LIMIT           reduce using rule 20 (cond -> LPAREN cond RPAREN .)
-    SIMICOLON       reduce using rule 20 (cond -> LPAREN cond RPAREN .)
-    RPAREN          reduce using rule 20 (cond -> LPAREN cond RPAREN .)
+    LIMIT           reduce using rule 43 (group -> empty .)
+    SIMICOLON       reduce using rule 43 (group -> empty .)
 
 
 state 93
 
-    (44) select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .
+    (7) insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN . SIMICOLON
 
-    $end            reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    AND             reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    OR              reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    GROUP           reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    ORDER           reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    LIMIT           reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    SIMICOLON       reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
-    RPAREN          reduce using rule 44 (select -> SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON .)
+    SIMICOLON       shift and go to state 99
 
 
 state 94
 
-    (72) limit -> LIMIT NUMBER .
+    (57) values -> values COMMA . values
+    (55) values -> . STRING
+    (56) values -> . NUMBER
+    (57) values -> . values COMMA values
 
-    SIMICOLON       reduce using rule 72 (limit -> LIMIT NUMBER .)
+    STRING          shift and go to state 76
+    NUMBER          shift and go to state 77
 
+    values                         shift and go to state 100
 
 state 95
 
-    (65) order -> ORDER BY orders .
-    (68) orders -> orders . COMMA orders
+    (16) factor -> LPAREN expression . RPAREN
+    (9) expression -> expression . PLUS term
+    (10) expression -> expression . MINUS term
 
-    LIMIT           reduce using rule 65 (order -> ORDER BY orders .)
-    SIMICOLON       reduce using rule 65 (order -> ORDER BY orders .)
-    COMMA           shift and go to state 104
+    RPAREN          shift and go to state 82
+    PLUS            shift and go to state 69
+    MINUS           shift and go to state 70
 
 
 state 96
 
-    (67) orders -> column . way
-    (50) column -> column . COMMA COLNAME
-    (69) way -> . ASC
-    (70) way -> . DESC
-    (71) way -> . empty
-    (43) empty -> .
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE into where group order . limit SIMICOLON
+    (53) limit -> . LIMIT NUMBER
+    (54) limit -> . empty
+    (5) empty -> .
 
-  ! shift/reduce conflict for COMMA resolved as shift
-    COMMA           shift and go to state 17
-    ASC             shift and go to state 106
-    DESC            shift and go to state 107
-    LIMIT           reduce using rule 43 (empty -> .)
-    SIMICOLON       reduce using rule 43 (empty -> .)
+    LIMIT           shift and go to state 102
+    SIMICOLON       reduce using rule 5 (empty -> .)
 
-  ! COMMA           [ reduce using rule 43 (empty -> .) ]
-
-    way                            shift and go to state 105
-    empty                          shift and go to state 108
+    limit                          shift and go to state 101
+    empty                          shift and go to state 103
 
 state 97
 
-    (61) group -> GROUP BY column having .
+    (49) order -> empty .
 
-    ORDER           reduce using rule 61 (group -> GROUP BY column having .)
-    LIMIT           reduce using rule 61 (group -> GROUP BY column having .)
-    SIMICOLON       reduce using rule 61 (group -> GROUP BY column having .)
+    LIMIT           reduce using rule 49 (order -> empty .)
+    SIMICOLON       reduce using rule 49 (order -> empty .)
 
 
 state 98
 
-    (63) having -> HAVING . cond
-    (11) cond -> . exp op exp
-    (12) cond -> . exp BETWEEN exp AND exp
-    (13) cond -> . exp IN tuple
-    (14) cond -> . exp is
-    (15) cond -> . exp LIKE STRING
-    (16) cond -> . EXISTS LPAREN select RPAREN
-    (17) cond -> . cond AND cond
-    (18) cond -> . cond OR cond
-    (19) cond -> . NOT cond
-    (20) cond -> . LPAREN cond RPAREN
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (42) group -> GROUP BY . db_column
+    (44) db_column -> . COLNAME
+    (45) db_column -> . COLNUMBER
 
-    EXISTS          shift and go to state 41
-    NOT             shift and go to state 43
-    LPAREN          shift and go to state 42
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    COLNAME         shift and go to state 105
+    COLNUMBER       shift and go to state 106
 
-    cond                           shift and go to state 109
-    exp                            shift and go to state 39
+    db_column                      shift and go to state 104
 
 state 99
 
-    (64) having -> empty .
+    (7) insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON .
 
-    ORDER           reduce using rule 64 (having -> empty .)
-    LIMIT           reduce using rule 64 (having -> empty .)
-    SIMICOLON       reduce using rule 64 (having -> empty .)
+    $end            reduce using rule 7 (insert -> INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON .)
 
 
 state 100
 
-    (12) cond -> exp BETWEEN exp AND . exp
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (57) values -> values COMMA values .
+    (57) values -> values . COMMA values
 
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+  ! shift/reduce conflict for COMMA resolved as shift
+    RPAREN          reduce using rule 57 (values -> values COMMA values .)
+    COMMA           shift and go to state 94
 
-    exp                            shift and go to state 110
+  ! COMMA           [ reduce using rule 57 (values -> values COMMA values .) ]
+
 
 state 101
 
-    (26) exps -> exp COMMA . exps
-    (25) exps -> . exp
-    (26) exps -> . exp COMMA exps
-    (21) exp -> . STRING
-    (22) exp -> . NUMBER
-    (23) exp -> . COLNAME
-    (24) exp -> . exp aop exp
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE into where group order limit . SIMICOLON
 
-    STRING          shift and go to state 40
-    NUMBER          shift and go to state 44
-    COLNAME         shift and go to state 45
+    SIMICOLON       shift and go to state 107
 
-    exp                            shift and go to state 82
-    exps                           shift and go to state 111
 
 state 102
 
-    (42) is -> IS NOT NULL .
+    (53) limit -> LIMIT . NUMBER
 
-    AND             reduce using rule 42 (is -> IS NOT NULL .)
-    OR              reduce using rule 42 (is -> IS NOT NULL .)
-    GROUP           reduce using rule 42 (is -> IS NOT NULL .)
-    ORDER           reduce using rule 42 (is -> IS NOT NULL .)
-    LIMIT           reduce using rule 42 (is -> IS NOT NULL .)
-    SIMICOLON       reduce using rule 42 (is -> IS NOT NULL .)
-    RPAREN          reduce using rule 42 (is -> IS NOT NULL .)
+    NUMBER          shift and go to state 108
 
 
 state 103
 
-    (16) cond -> EXISTS LPAREN select RPAREN .
+    (54) limit -> empty .
 
-    AND             reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
-    OR              reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
-    GROUP           reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
-    ORDER           reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
-    LIMIT           reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
-    SIMICOLON       reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
-    RPAREN          reduce using rule 16 (cond -> EXISTS LPAREN select RPAREN .)
+    SIMICOLON       reduce using rule 54 (limit -> empty .)
 
 
 state 104
 
-    (68) orders -> orders COMMA . orders
-    (67) orders -> . column way
-    (68) orders -> . orders COMMA orders
-    (47) column -> . TIMES
-    (48) column -> . COLNAME
-    (49) column -> . aggregatefun
-    (50) column -> . column COMMA COLNAME
-    (51) aggregatefun -> . aggregatename LPAREN distinct column RPAREN
-    (52) aggregatename -> . COUNT
-    (53) aggregatename -> . MAX
-    (54) aggregatename -> . MIN
-    (55) aggregatename -> . SUM
-    (56) aggregatename -> . AVG
+    (42) group -> GROUP BY db_column .
 
-    TIMES           shift and go to state 7
-    COLNAME         shift and go to state 8
-    COUNT           shift and go to state 11
-    MAX             shift and go to state 12
-    MIN             shift and go to state 13
-    SUM             shift and go to state 14
-    AVG             shift and go to state 15
+    LIMIT           reduce using rule 42 (group -> GROUP BY db_column .)
+    SIMICOLON       reduce using rule 42 (group -> GROUP BY db_column .)
 
-    orders                         shift and go to state 112
-    column                         shift and go to state 96
-    aggregatefun                   shift and go to state 9
-    aggregatename                  shift and go to state 10
 
 state 105
 
-    (67) orders -> column way .
+    (44) db_column -> COLNAME .
 
-    COMMA           reduce using rule 67 (orders -> column way .)
-    LIMIT           reduce using rule 67 (orders -> column way .)
-    SIMICOLON       reduce using rule 67 (orders -> column way .)
+    LIMIT           reduce using rule 44 (db_column -> COLNAME .)
+    SIMICOLON       reduce using rule 44 (db_column -> COLNAME .)
 
 
 state 106
 
-    (69) way -> ASC .
+    (45) db_column -> COLNUMBER .
 
-    COMMA           reduce using rule 69 (way -> ASC .)
-    LIMIT           reduce using rule 69 (way -> ASC .)
-    SIMICOLON       reduce using rule 69 (way -> ASC .)
+    LIMIT           reduce using rule 45 (db_column -> COLNUMBER .)
+    SIMICOLON       reduce using rule 45 (db_column -> COLNUMBER .)
 
 
 state 107
 
-    (70) way -> DESC .
+    (6) select -> SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON .
 
-    COMMA           reduce using rule 70 (way -> DESC .)
-    LIMIT           reduce using rule 70 (way -> DESC .)
-    SIMICOLON       reduce using rule 70 (way -> DESC .)
+    $end            reduce using rule 6 (select -> SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON .)
+    RPAREN          reduce using rule 6 (select -> SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON .)
 
 
 state 108
 
-    (71) way -> empty .
+    (53) limit -> LIMIT NUMBER .
 
-    COMMA           reduce using rule 71 (way -> empty .)
-    LIMIT           reduce using rule 71 (way -> empty .)
-    SIMICOLON       reduce using rule 71 (way -> empty .)
-
-
-state 109
-
-    (63) having -> HAVING cond .
-    (17) cond -> cond . AND cond
-    (18) cond -> cond . OR cond
-
-    ORDER           reduce using rule 63 (having -> HAVING cond .)
-    LIMIT           reduce using rule 63 (having -> HAVING cond .)
-    SIMICOLON       reduce using rule 63 (having -> HAVING cond .)
-    AND             shift and go to state 50
-    OR              shift and go to state 51
-
-
-state 110
-
-    (12) cond -> exp BETWEEN exp AND exp .
-    (24) exp -> exp . aop exp
-    (33) aop -> . PLUS
-    (34) aop -> . MINUS
-    (35) aop -> . TIMES
-    (36) aop -> . DIVIDE
-    (37) aop -> . PERCENT
-
-    AND             reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    OR              reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    GROUP           reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    ORDER           reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    LIMIT           reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    SIMICOLON       reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    RPAREN          reduce using rule 12 (cond -> exp BETWEEN exp AND exp .)
-    PLUS            shift and go to state 65
-    MINUS           shift and go to state 66
-    TIMES           shift and go to state 67
-    DIVIDE          shift and go to state 68
-    PERCENT         shift and go to state 69
-
-    aop                            shift and go to state 57
-
-state 111
-
-    (26) exps -> exp COMMA exps .
-
-    AND             reduce using rule 26 (exps -> exp COMMA exps .)
-    OR              reduce using rule 26 (exps -> exp COMMA exps .)
-    GROUP           reduce using rule 26 (exps -> exp COMMA exps .)
-    ORDER           reduce using rule 26 (exps -> exp COMMA exps .)
-    LIMIT           reduce using rule 26 (exps -> exp COMMA exps .)
-    SIMICOLON       reduce using rule 26 (exps -> exp COMMA exps .)
-    RPAREN          reduce using rule 26 (exps -> exp COMMA exps .)
-
-
-state 112
-
-    (68) orders -> orders COMMA orders .
-    (68) orders -> orders . COMMA orders
-
-  ! shift/reduce conflict for COMMA resolved as shift
-    LIMIT           reduce using rule 68 (orders -> orders COMMA orders .)
-    SIMICOLON       reduce using rule 68 (orders -> orders COMMA orders .)
-    COMMA           shift and go to state 104
-
-  ! COMMA           [ reduce using rule 68 (orders -> orders COMMA orders .) ]
+    SIMICOLON       reduce using rule 53 (limit -> LIMIT NUMBER .)
 
 WARNING: 
 WARNING: Conflicts:
 WARNING: 
-WARNING: shift/reduce conflict for AND in state 72 resolved as shift
-WARNING: shift/reduce conflict for OR in state 72 resolved as shift
-WARNING: shift/reduce conflict for AND in state 78 resolved as shift
-WARNING: shift/reduce conflict for OR in state 78 resolved as shift
+WARNING: shift/reduce conflict for COMMA in state 35 resolved as shift
+WARNING: shift/reduce conflict for AND in state 68 resolved as shift
+WARNING: shift/reduce conflict for OR in state 68 resolved as shift
 WARNING: shift/reduce conflict for AND in state 79 resolved as shift
 WARNING: shift/reduce conflict for OR in state 79 resolved as shift
-WARNING: shift/reduce conflict for PLUS in state 88 resolved as shift
-WARNING: shift/reduce conflict for MINUS in state 88 resolved as shift
-WARNING: shift/reduce conflict for TIMES in state 88 resolved as shift
-WARNING: shift/reduce conflict for DIVIDE in state 88 resolved as shift
-WARNING: shift/reduce conflict for PERCENT in state 88 resolved as shift
-WARNING: shift/reduce conflict for COMMA in state 96 resolved as shift
-WARNING: shift/reduce conflict for COMMA in state 112 resolved as shift
+WARNING: shift/reduce conflict for AND in state 80 resolved as shift
+WARNING: shift/reduce conflict for OR in state 80 resolved as shift
+WARNING: shift/reduce conflict for COMMA in state 100 resolved as shift

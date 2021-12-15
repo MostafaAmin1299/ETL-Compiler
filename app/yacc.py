@@ -5,11 +5,63 @@ from etl import ETL
 
 start = 'start'
 def p_start(p):
-    'start : select | insert | update | delete'
+    '''start : select 
+             | insert 
+             | update 
+             | delete'''
+    p[0] = p[1]
+
+def p_empty(p):
+    'empty :'
     pass
 
 def p_error(p):
-    print("Syntax error in input!", p)
+    print("Syntax error!")
+
+
+
+###########################
+#==== Yet SELECT STATEMENT​​ 
+###########################
+
+def p_select(p):
+    'select : SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON'
+
+    # etl = ETL()
+    # etl.extract(p[5])
+    # etl.transform({
+    #     "COLUMNS":  p[3],
+    #     "DISTINCT": p[2],
+    #     "FILTER":   p[7],
+    #     "LIMIT":    p[10]
+    # })
+    # etl.load(p[6])
+
+    p[0] = f'''<SELECT STATEMENT>
+    EXTRACT DATASOURCE: {p[5]}
+    TRANFORMATION: 
+        COLUMNS = {p[3]}
+        DISTINCT? {p[2]}
+        FILTER:   {p[7]}
+        LIMIT:    {p[10]}
+    LOAD DATASOURCE: {p[6]}
+
+    '''
+    
+
+
+###########################
+#==== Yet INSERT STATEMENT 
+###########################
+
+def p_insert(p):
+    '''insert : INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
+              | INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON'''
+    p[0] = f'''<INSERT STATEMENT>
+    VALUES: {p[5]}
+    LOAD DATASOURCE: {p[3]}
+
+    '''
 
 
 
@@ -50,14 +102,10 @@ def p_factor_expr(p):
     p[0] = p[2]
 
 
-##########################
-#==== BASIC VARIABLES ====
-##########################
 
-def p_empty(p):
-    'empty :'
-    p[0] = ''
-
+##########################
+#====== COMPARISON =======
+##########################
 
 def p_logical(p):
     '''logical :  EQUAL 
@@ -66,110 +114,54 @@ def p_logical(p):
                 | BIGGER 
                 | SMALLER_EQUAL 
                 | SMALLER'''
-    pass
+    p[0] = p[1]
 
+
+
+##########################
+#====== WHERE CLAUSE =====
+##########################
 
 def p_where(p):
-    'where : WHERE cond'         
+    'where : WHERE conditions'         
     p[0] = p[2]
 
 def p_where_empty(p):
     'where : empty'
-    p[0] = True
-
+    p[0] = None
 
 def p_cond_parens(p):
-    'cond : LPAREN cond RPAREN'
+    'conditions : LPAREN conditions RPAREN'
     p[0] = p[2]
 
-def p_cond_logical(p):
-    'cond : exp logical exp'
-    pass
+def p_cond_3(p):
+    '''conditions : conditions AND conditions 
+                  | conditions OR conditions
+                  | exp LIKE STRING
+                  | exp logical exp'''
+    p[0] = {'type': p[2], 'left': p[1], 'right': p[3]}
 
-def p_cond_between(p):
-    'cond : exp BETWEEN exp AND exp'
-    pass
+def p_conditions_not(p):
+    'conditions : NOT conditions'
+    p[0] = {p[1]: p[2]}
 
-def p_cond_in(p):
-    'cond : exp IN tuple'
-    pass
 
-def p_cond_is(p):
-    'cond: exp is'
-    pass
 
-def p_cond_like(p):
-    'cond : exp LIKE STRING'
-    pass
-
-def p_cond_exists(p):
-    'cond : EXISTS LPAREN select RPAREN'
-    pass
-
-def p_cond_and(p):
-    'cond : cond AND cond'
-    p[0] = p[1] and p[3]
-
-def p_cond_or(p):
-    'cond : cond OR cond'
-    p[0] = p[1] or p[3]
-
-def p_cond_not(p):
-    'cond : NOT cond'
-    p[0] = not p[2]
+##########################
+#========== EXP ==========
+##########################
 
 def p_exp(p):
     '''exp : STRING
-           | NUMBER
            | COLNAME
            | expression''' 
-    pass
-
-def p_exps(p):
-    '''exps : exp 
-            | exp COMMA exps'''
-    pass
-
-
-def p_tuple(p):
-    '''tuple : select
-             | exps
-             | empty'''
-    pass
-
-def p_is(p):
-    '''is : IS NULL
-          | IS NOT NULL'''
-    pass
+    p[0] = p[1]
 
 
 
 ###########################
-#==== SELECT STATEMENT​​ ====
+#======== Distinct ========
 ###########################
-
-def p_select(p):
-    'select : SELECT distinct column into FROM DATASOURCE where group order limit SIMICOLON'
-    from app.etl import ETL
-    data_source = str(p[6][1:-1])
-
-    etl = ETL()
-    etl.extract(data_source)
-
-    criteria = {}
-    criteria['distinct'] = p[2]
-    criteria['limit'] = p[10]
-    etl.transform() # according to: where, distinct, group, order, limit, column
-
-
-    if p[4] == None:
-        print(etl.data)
-    else:
-        etl.load(p[4])
-    
-
-
-
 
 def p_distinct(p):
     '''distinct : DISTINCT'''
@@ -179,69 +171,101 @@ def p_distinct_empty(p):
     '''distinct : empty'''
     p[0] = False
 
-def p_column(p):
-    '''column : TIMES
-              | COLNAME
-              | aggregatefun'''
-    p[0] = [p[1]]
+
+
+###########################
+#===== SELECT COLUMNS​​ =====
+###########################
+
+def p_select_columns_all(p):
+    'select_columns : TIMES'
+    p[0] = ['__all__']
+
+def p_column_number(p):
+    'select_columns : COLNUMBER'
+    p[0] = [int(p[1][1:-1])]
+
+def p_column_name(p):
+    'select_columns : COLNAME'
+    p[0] = [str(p[1])]
 
 def p_columns(p):
-    '''column : column COMMA COLNAME'''
+    'select_columns : select_columns COMMA select_columns'
     p[0] = []
-    if type(p[1]) == list:
-        p[0].extend(p[1])
-    else:
-        p[0].append(p[1])
-    p[0].append(p[3])
+    p[0].extend(p[1])
+    p[0].extend(p[3])
 
 
-def p_aggregatefun(p):
-    'aggregatefun : aggregatename LPAREN distinct column RPAREN'
-    p[0] = ''
 
-def p_aggregatename(p):
-    '''aggregatename : COUNT
-                     | MAX
-                     | MIN
-                     | SUM
-                     | AVG'''
-    pass
+###########################
+#========= Into ===========
+###########################
 
 def p_into(p):
-    '''into : INTO DATASOURCE external
-    | empty'''
-    p[0] = ''
+    'into : INTO DATASOURCE'
+    p[0] = p[2]
 
-def p_external(p):
-    '''external : IN column
-                | empty'''
-    pass
+def p_into_empty(p):
+    'into : empty'
+    p[0] = None
+
+
+
+###########################
+#=======  Group by ========
+###########################
 
 def p_group(p):
-    '''group : GROUP BY column having
-             | empty'''
-    p[0] = ''
+    'group : GROUP BY db_column'
+    p[0] = p[3]
 
-def p_having(p):
-    '''having : HAVING cond
-              | empty'''
-    pass
+def p_group_empty(p):
+    'group : empty'
+    p[0] = None
+
+def p_db_column(p):
+    '''db_column : COLNAME 
+                    | COLNUMBER'''
+    p[0] = p[1]
+
+
+
+###########################
+#======= Order by =========
+###########################
+
+def p_order_by(p):
+    '''orders : ORDER BY orders'''
+    p[0] = p[3]
 
 def p_order(p):
-    '''order : ORDER BY orders
-             | empty'''
-    p[0] = ''
+    'orders : db_column way'
+    p[0] = [(p[1], p[2])]
 
 def p_orders(p):
-    '''orders : column way
-              | orders COMMA orders'''
-    pass
+    'orders : orders COMMA orders'
+    p[0] = []
+    p[0] = p[0].extend(p[1])
+    p[0] = p[0].extend(p[3])
 
-def p_way(p):
-    '''way : ASC
-           | DESC
+def p_order_empty(p):
+    'order : empty'
+    p[0] = None
+
+def p_way_asc(p):
+    '''way : ASC 
            | empty'''
-    pass
+    p[0] = 'ASC'
+
+def p_way_desc(p):
+    'way : DESC'
+    p[0] = 'DESC'
+
+
+
+###########################
+#========= Limit ==========
+###########################
 
 def p_limit(p):
     '''limit : LIMIT NUMBER'''
@@ -255,46 +279,44 @@ def p_limit_empty(p):
     p[0] = None
 
 
-
 ###########################
-#==== INSERT STATEMENT​​ ====
+#====== YET INSERT VALUES​ =====
 ###########################
-
-def p_insert(p):
-    '''insert : INSERT INTO DATASOURCE icolumn VALUES LPAREN value RPAREN SIMICOLON
-              | INSERT INTO DATASOURCE icolumn select SIMICOLON'''
-    pass
 
 def p_value(p):
-    '''value : STRING
-             | NUMBER
-             | value COMMA value'''
-    pass
+    '''values : STRING
+             | NUMBER'''
+    p[0] = [p[1]]
+
+def p_values(p):
+    'values : values COMMA values'
+    p[0] = []
+    p[0] = p[0].extend(p[1])
+    p[0] = p[0].extend(p[3])
 
 def p_icolumn(p):
-    '''icolumn : LPAREN COLNAME RPAREN
+    '''icolumn : empty'''
+    pass
+
+
+
+###########################
+#==== YET UPDATE STATEMENT​​ ====
+###########################
+
+def p_update(p):
+    'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
+    pass
+
+def p_assigns(p):
+    '''assigns : COLNAME EQUAL
                | empty'''
     pass
 
 
 
 ###########################
-#==== UPDATE STATEMENT​​ ====
-###########################
-
-def p_update(p):
-    'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
-    pass
-
-def p_assigns(p):
-    '''assigns : column EQUAL value
-               | assigns COMMA assigns'''
-    pass
-
-
-
-###########################
-#==== DELETE STATEMENT​​ ====
+#==== YET DELETE STATEMENT​​ ====
 ###########################
 
 def p_delete(p):
@@ -310,6 +332,7 @@ if __name__=='__main__':
     while True:
         s = input('yacc> ')
         if not s: break
+        s = s.lower()
         result = parser.parse(s)
         print(result)
     

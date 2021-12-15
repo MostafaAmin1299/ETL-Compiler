@@ -58,6 +58,7 @@ tokens = [
     'COMMA',
     'STRING',
     'PATTERN',
+    'COLNUMBER',
 ] + list(reserved.values())
 
 # Regular expression rules for simple tokens
@@ -68,7 +69,7 @@ t_DIVIDE    = r'/'
 t_PERCENT   = r'%'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
-t_EQUAL         = r'='
+t_EQUAL         = r'=='
 t_NOTEQUAL      = r'<>'
 t_BIGGER_EQUAL  = r'>='
 t_BIGGER        = r'>'
@@ -76,8 +77,8 @@ t_SMALLER_EQUAL = r'<='
 t_SMALLER       = r'<'
 t_SIMICOLON = r';'
 t_COMMA     = r','
-t_DATASOURCE      = r'\[[^,\]\[]+\]'
 t_STRING          = r'"([^"\n])*"'
+t_COLNUMBER      = r'\[\d+\]'
 
 # ignored characters 
 t_ignore  = ' \t'  # Spaces and tabs
@@ -99,6 +100,11 @@ def t_NUMBER(t):
     t.value = int(t.value)
     return t
 
+@TOKEN(r'\[[^,\]\[]+\]')
+def t_DATASOURCE(t):
+    t.value = str(t.value[1:-1])
+    return t
+
 @TOKEN(r'\n+')
 def t_newline(t):
     t.lexer.lineno += len(t.value)
@@ -110,7 +116,6 @@ def t_error(t):
 
 
 
-# Build the lexer and try it out
 lexer = lex.lex()
 
 if __name__=='__main__':

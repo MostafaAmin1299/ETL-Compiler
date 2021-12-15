@@ -20,7 +20,15 @@ class ETL():
 
 
     def transform(self, criteria:dict):
-        pass
+        transformed_data = pd.DataFrame()
+        for column in criteria['COLUMNS']:
+            if column == '__all__':
+                transformed_data = transformed_data.append(self.data)
+            else:
+                transformed_data = transformed_data.append({column: self.data[column]})
+
+        return transformed_data
+
 
 
     def load(self, data_destination:str):
@@ -31,21 +39,21 @@ class ETL():
             self.__load_to_sqlite(data_destination)
         elif source_type == 'MSSQL':
             self.__load_to_mssql(data_destination)
+        elif source_type == 'CONSOL':
+            print(self.data)
         else:
-            return 'Data source name is wrong'
+            raise Exception(f'Couldn\'t connect with {data_destination}')
 
 
 
     def __get_source_type(self, data_source:str):
-        csv = re.search('.*\.csv.*', data_source)
-        sqlite = re.search('.*\.db.*', data_source)
-        mssql = re.search('Data Source.*', data_source)
-
-        if csv:   
+        if data_source == None:
+            return 'CONSOL'
+        elif re.search(r'.*\.csv(\.zip)?', data_source):   
             return 'CSV'
-        elif sqlite:
+        elif re.search(r'.*\.db', data_source):
             return 'SQLITE'
-        elif mssql:
+        elif re.search(r'Data Source.*', data_source):
             return 'MSSQL'
 
 
@@ -59,8 +67,11 @@ class ETL():
         self.data = pd.read_sql(f'select * from {data_source[1]}', sqlite_engine)
 
 
+    # Not Finished
     def __extract_from_mssql(self, data_source):
-        pass
+        mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{"server_name"}/{"mssql_db_name"}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
+        table = mssql_engine.execute(f"SELECT * FROM {'table_name'};")
+        self.data = pd.DataFrame(table, columns=table.keys())
 
 
     def __load_to_csv(self, data_destination):
@@ -74,104 +85,10 @@ class ETL():
         for df in self.data:
             df.to_sql(data_destination[1], sqlite_engine, if_exists='append', index=False)
 
-
-    def __load_to_mssql(data_destination):
-        pass
-
-
-
-
-class ETLO:
-
-    @staticmethod
-    def csv_to_sqlite(csv_file_path, columns_data_types={}, sqlite_db_file_path=None, table_name="csv_data"):
-        """A function that opens and reads a csv file and copies its data into an sqlite database (given or created)."""
-
-        if sqlite_db_file_path == None:
-            db_file_path = csv_file_path + ".db"
-
-        try:
-            # Read csv file into a TextFileReader
-            csv_data = pd.read_csv(csv_file_path, chunksize=100000, iterator=True, dtype=columns_data_types)
-
-            sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{db_file_path}')
-
-            # Insert a csv data into the sqlite database
-            for df in csv_data:
-                df.to_sql(table_name, sqlite_engine, if_exists='append', index=False)
-
-        except Exception as e:
-            print(e)
-            return False
-        
-        else:
-            return True
-
-
-    @staticmethod
-    def mssql_to_sqlite(server_name="MOSA", mssql_db_name="Users", table_name="mssql_data", sqlite_db_file_path=None):
-        """A function that opens and reads an mssql database and copies its data into an sqlite database (given or created)."""
-
-        if sqlite_db_file_path == None:
-            sqlite_db_file_path =  mssql_db_name + ".db"
-
-        try:
-            mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server_name}/{mssql_db_name}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
-            sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{sqlite_db_file_path}')
-
-            # Getting the table data we need
-            table = mssql_engine.execute(f"SELECT * FROM {table_name};")
-
-            # Turn the data into a pandas DataFrame
-            df = pd.DataFrame(table, columns=table.keys())
-
-            # Insert the data into the sqlite database
-            df.to_sql(table_name, sqlite_engine, if_exists='append', index=False)
-
-        except Exception as e:
-            print(e)
-            return False
-        
-        else:
-            return True
-
-
-    @staticmethod
-    def make_query(sqlite_db_path,query):
-        """A function that execute a series of queries given by the user."""
-
-        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{sqlite_db_path}')
-
-        try:
-            result = sqlite_engine.execute(query)
-            print(",".join(result.keys()))
-            for row in result.fetchall():
-                row = [str(i) for i in list(row)]
-                print(",".join(row))
-
-        except Exception as e:
-            print(e)
-            print("Couldn't execute query.")
-
-
-    @staticmethod
-    def csv_to_mssql(csv_file_path,server_name="MOSA", mssql_db_name="Users", table_name="csv_data", colums_data_types={}):
-        """A function that opens and reads a csv file and copies its data into an mssql database."""
-
-        try:
-            csv_data = pd.read_csv(csv_file_path, chunksize=100000, iterator=True, dtype=colums_data_types)
-            mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{server_name}/{mssql_db_name}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
-
-            # Insert a csv data into the mssql database
-            for df in csv_data:
-                df.to_sql(table_name, mssql_engine, if_exists='append', index=False)
-
-        except Exception as e:
-            print(e)
-            return False
-        
-        else:
-            return True
+    # Not Finished
+    def __load_to_mssql(self, connection_string):
+        mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{"server_name"}/{"mssql_db_name"}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
+        self.data.to_sql("table_name", mssql_engine, if_exists='append', index=False)
 
 
     @staticmethod
@@ -222,4 +139,4 @@ class ETLO:
         
         # Save the data into a zipped csv file
         df.to_csv(csv_file_path + ".csv.zip", index_label='id', compression='zip')
-        
+
