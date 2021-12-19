@@ -5,85 +5,133 @@ import sqlalchemy
 import re
 
 class ETL():
-    data:pd.DataFrame = None
-
-    def extract(self, data_source:str):
+    def extract(self, data_source:str) -> pd.DataFrame:
         source_type = self.__get_source_type(data_source)
         if source_type == 'CSV':
-            self.__extract_from_csv(data_source)
+            data = self.__extract_from_csv(data_source)
         elif source_type == 'SQLITE':
-            self.__extract_from_sqlite(data_source)
+            db = data_source.split('/')[0]
+            table_name = data_source.split('/')[1]
+            data = self.__extract_from_sqlite(db, table_name)
         elif source_type == 'MSSQL':
-            self.__extract_from_mssql(data_source)
+            data = self.__extract_from_mssql(data_source)
         else:
-            return 'Data source name is wrong'
+            raise Exception(f'Unsupported data source')
+        
+        return data
 
 
-    def transform(self, criteria:dict):
-        transformed_data = pd.DataFrame()
-        for column in criteria['COLUMNS']:
-            if column == '__all__':
-                transformed_data = transformed_data.append(self.data)
-            else:
-                transformed_data = transformed_data.append({column: self.data[column]})
+    def transform(self, data:pd.DataFrame, criteria:dict) -> pd.DataFrame:
+        # filtering
+        if criteria['FILTER']:
+            data = self.__filter(data, criteria['FILTER'])
 
-        return transformed_data
+        # columns
+        if criteria['COLUMNS'] != '__all__':
+            data = data.filter(items=criteria['COLUMNS'])
+
+        # distinct
+        if criteria['DISTINCT']:
+            data = data.drop_duplicates()
+
+        # ordering
+        if criteria['ORDER']:
+            column = criteria['ORDER'][0]
+            data = data.sort_values(column, ascending=criteria['ORDER'][1] == 'ASC')
+
+        # limit
+        if criteria['LIMIT']:
+            data = data[:criteria['LIMIT']]
+
+        return data
 
 
-
-    def load(self, data_destination:str):
+    def load(self, data:pd.DataFrame, data_destination:str):
         source_type = self.__get_source_type(data_destination)
         if source_type == 'CSV':
-            self.__load_to_csv(data_destination)
+            self.__load_to_csv(data, data_destination)
         elif source_type == 'SQLITE':
-            self.__load_to_sqlite(data_destination)
+            db_destination = data_destination.split('/')[0]
+            table_name = data_destination.split('/')[1]
+            self.__load_to_sqlite(data, db_destination, table_name)
         elif source_type == 'MSSQL':
-            self.__load_to_mssql(data_destination)
+            self.__load_to_mssql(data, data_destination)
         elif source_type == 'CONSOL':
-            print(self.data)
+            print(data)
         else:
-            raise Exception(f'Couldn\'t connect with {data_destination}')
+            raise Exception(f'Unsupported data destination')
 
 
-
-    def __get_source_type(self, data_source:str):
+    def __get_source_type(self, data_source:str) -> str:
         if data_source == None:
             return 'CONSOL'
         elif re.search(r'.*\.csv(\.zip)?', data_source):   
             return 'CSV'
-        elif re.search(r'.*\.db', data_source):
+        elif re.search(r'.*\.db/\w+', data_source):
             return 'SQLITE'
         elif re.search(r'Data Source.*', data_source):
             return 'MSSQL'
 
 
-    def __extract_from_csv(self, data_source):
-        self.data = pd.read_csv(data_source, chunksize=100000, iterator=True)
+    def __extract_from_csv(self, data_source) -> pd.DataFrame:
+        data = pd.read_csv(data_source)
+        return data
 
         
-    def __extract_from_sqlite(self, data_source):
-        data_source = data_source.split(';')
-        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{data_source[0]}')
-        self.data = pd.read_sql(f'select * from {data_source[1]}', sqlite_engine)
+    def __extract_from_sqlite(self, db_file_path, table_name) -> pd.DataFrame:
+        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{db_file_path}')
+        data = pd.read_sql(f'select * from {table_name}', sqlite_engine)
+        return data
 
 
     # Not Finished
-    def __extract_from_mssql(self, data_source):
+    def __extract_from_mssql(self, connection_string) -> pd.DataFrame:
         mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{"server_name"}/{"mssql_db_name"}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
         table = mssql_engine.execute(f"SELECT * FROM {'table_name'};")
-        self.data = pd.DataFrame(table, columns=table.keys())
+        data = pd.DataFrame(table, columns=table.keys())
+        return data
 
 
-    def __load_to_csv(self, data_destination):
-        self.data.to_csv(data_destination + ".csv", header=None, mode='a')
+    def __filter(self, data:pd.DataFrame, filters:dict) -> pd.DataFrame:
+        left = filters['left']
+        right = filters['right'] 
+
+        if filters["type"] == 'or' or filters["type"] == 'and':
+            left = self.__filter(data, left)
+            right = self.__filter(data, right)
+
+            if filters["type"] == 'or':
+                data = pd.concat([left, right])
+            elif filters["type"] == 'and':
+                data = pd.merge(left, right)
+            data = data[~data.index.duplicated(keep='first')]
+
+        elif filters["type"] == 'like':
+            data = data[[True if re.match(right, str(x)) else False for x in data[left]]]
+        elif filters["type"] == '>':
+            data = data[data[left] > right]
+        elif filters["type"] == '>=':
+            data = data[data[left] >= right]
+        elif filters["type"] == '<':
+            data = data[data[left] < right]
+        elif filters["type"] == '<=':
+            data = data[data[left] <= right]
+        elif filters["type"] == '==':
+            data = data[data[left] == str(right).lower()]
+        elif filters["type"] == '!=':
+            data = data[data[left] != right]
+
+        return data
 
 
-    def __load_to_sqlite(self, data_destination):
-        data_destination = data_destination.split(';')
-        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{data_destination[0]}')
+    def __load_to_csv(self, data, csv_file_path):
+        data.to_csv(csv_file_path + ".csv", header=None, mode='a')
 
-        for df in self.data:
-            df.to_sql(data_destination[1], sqlite_engine, if_exists='append', index=False)
+
+    def __load_to_sqlite(self, data, db_file_path, table_name):
+        sqlite_engine = sqlalchemy.create_engine(f'sqlite:///{db_file_path}')
+        data.to_sql(table_name, sqlite_engine, if_exists='append', index=False)
+
 
     # Not Finished
     def __load_to_mssql(self, connection_string):

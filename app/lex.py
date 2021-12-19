@@ -77,8 +77,6 @@ t_SMALLER_EQUAL = r'<='
 t_SMALLER       = r'<'
 t_SIMICOLON = r';'
 t_COMMA     = r','
-t_STRING          = r'"([^"\n])*"'
-t_COLNUMBER      = r'\[\d+\]'
 
 # ignored characters 
 t_ignore  = ' \t'  # Spaces and tabs
@@ -90,9 +88,19 @@ nondigit         = r'([_A-Za-z])'
 identifier       = r'(' + nondigit + r'(' + digit + r'|' + nondigit + r')*)'
 identifier       = identifier + r'|' + r'\[' + digit + r'+\]' 
 
+@TOKEN(r'"([^"\n])*"')
+def t_STRING(t):
+    t.value = str(t.value)[1:-1]
+    return t
+
 @TOKEN(identifier)
 def t_COLNAME(t):
     t.type = reserved.get(t.value,'COLNAME')    # Check for reserved words
+    return t
+
+@TOKEN(r'\[\d+\]')
+def t_COLNUMBER(t):
+    t.value = int(t.value[1:-1])
     return t
 
 @TOKEN(r'\d+')

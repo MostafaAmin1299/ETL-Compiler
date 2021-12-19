@@ -25,28 +25,22 @@ def p_error(p):
 ###########################
 
 def p_select(p):
-    'select : SELECT distinct select_columns FROM DATASOURCE into where group order limit SIMICOLON'
+    'select : SELECT distinct select_columns FROM DATASOURCE into where order limit SIMICOLON'
+    etl = ETL()
+    data = etl.extract(p[5])
+    data = etl.transform(
+        data, 
+        {
+            "COLUMNS":  p[3],
+            "DISTINCT": p[2],
+            "FILTER":   p[7],
+            "ORDER":    p[8],
+            "LIMIT":    p[9],
+        }
+    )
+    etl.load(data, p[6])
 
-    # etl = ETL()
-    # etl.extract(p[5])
-    # etl.transform({
-    #     "COLUMNS":  p[3],
-    #     "DISTINCT": p[2],
-    #     "FILTER":   p[7],
-    #     "LIMIT":    p[10]
-    # })
-    # etl.load(p[6])
-
-    p[0] = f'''<SELECT STATEMENT>
-    EXTRACT DATASOURCE: {p[5]}
-    TRANFORMATION: 
-        COLUMNS = {p[3]}
-        DISTINCT? {p[2]}
-        FILTER:   {p[7]}
-        LIMIT:    {p[10]}
-    LOAD DATASOURCE: {p[6]}
-
-    '''
+    p[0] = None
     
 
 
@@ -57,6 +51,7 @@ def p_select(p):
 def p_insert(p):
     '''insert : INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
               | INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON'''
+
     p[0] = f'''<INSERT STATEMENT>
     VALUES: {p[5]}
     LOAD DATASOURCE: {p[3]}
@@ -172,6 +167,24 @@ def p_distinct_empty(p):
     p[0] = False
 
 
+###########################
+#======== COLUMNS =========
+###########################
+def p_column(p):
+    '''column : COLNUMBER
+               | COLNAME'''
+    p[0] = p[1]
+
+def p_columns(p):
+    '''columns : columns COMMA columns'''
+    p[0] = []
+    p[0].extend(p[1])
+    p[0].extend(p[3])
+
+def p_columns_base(p):
+    '''columns : column'''
+    p[0] = [p[1]]
+
 
 ###########################
 #===== SELECT COLUMNS​​ =====
@@ -179,21 +192,11 @@ def p_distinct_empty(p):
 
 def p_select_columns_all(p):
     'select_columns : TIMES'
-    p[0] = ['__all__']
+    p[0] = '__all__'
 
-def p_column_number(p):
-    'select_columns : COLNUMBER'
-    p[0] = [int(p[1][1:-1])]
-
-def p_column_name(p):
-    'select_columns : COLNAME'
-    p[0] = [str(p[1])]
-
-def p_columns(p):
-    'select_columns : select_columns COMMA select_columns'
-    p[0] = []
-    p[0].extend(p[1])
-    p[0].extend(p[3])
+def p_select_columns(p):
+    'select_columns : columns'
+    p[0] = p[1]
 
 
 
@@ -212,41 +215,12 @@ def p_into_empty(p):
 
 
 ###########################
-#=======  Group by ========
-###########################
-
-def p_group(p):
-    'group : GROUP BY db_column'
-    p[0] = p[3]
-
-def p_group_empty(p):
-    'group : empty'
-    p[0] = None
-
-def p_db_column(p):
-    '''db_column : COLNAME 
-                    | COLNUMBER'''
-    p[0] = p[1]
-
-
-
-###########################
 #======= Order by =========
 ###########################
 
 def p_order_by(p):
-    '''orders : ORDER BY orders'''
-    p[0] = p[3]
-
-def p_order(p):
-    'orders : db_column way'
-    p[0] = [(p[1], p[2])]
-
-def p_orders(p):
-    'orders : orders COMMA orders'
-    p[0] = []
-    p[0] = p[0].extend(p[1])
-    p[0] = p[0].extend(p[3])
+    '''order : ORDER BY column way'''
+    p[0] = (p[3], p[4])
 
 def p_order_empty(p):
     'order : empty'
