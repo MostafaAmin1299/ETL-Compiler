@@ -15,6 +15,12 @@ class ETL():
             data = self.__extract_from_sqlite(db, table_name)
         elif source_type == 'MSSQL':
             data = self.__extract_from_mssql(data_source)
+        elif source_type == 'HTML':
+            data = self.__extract_from_html(data_source)
+        elif source_type == 'JSON':
+            data = self.__extract_from_json(data_source)
+        elif source_type == 'XML':
+            data = self.__extract_from_xml(data_source)
         else:
             raise Exception(f'Unsupported data source')
         
@@ -56,6 +62,12 @@ class ETL():
             self.__load_to_sqlite(data, db_destination, table_name)
         elif source_type == 'MSSQL':
             self.__load_to_mssql(data, data_destination)
+        elif source_type == 'HTML':
+            self.__load_to_html(data, data_destination)
+        elif source_type == 'JSON':
+            self.__load_to_json(data, data_destination)
+        elif source_type == 'XML':
+            self.__load_to_xml(data, data_destination)
         elif source_type == 'CONSOL':
             print(data)
         else:
@@ -71,6 +83,12 @@ class ETL():
             return 'SQLITE'
         elif re.search(r'Data Source.*', data_source):
             return 'MSSQL'
+        elif re.search(r'.*\.html', data_source):   
+            return 'HTML'
+        elif re.search(r'.*\.json', data_source):   
+            return 'JSON'
+        elif re.search(r'.*\.xml', data_source):   
+            return 'XML'
 
 
     def __extract_from_csv(self, data_source) -> pd.DataFrame:
@@ -90,6 +108,20 @@ class ETL():
         table = mssql_engine.execute(f"SELECT * FROM {'table_name'};")
         data = pd.DataFrame(table, columns=table.keys())
         return data
+
+    def __extract_from_html(self, connection_string) -> pd.DataFrame:
+        data = pd.read_html(connection_string)
+        return data[0]
+
+    def __extract_from_json(self, connection_string) -> pd.DataFrame:
+        data = pd.read_json(connection_string, orient='records')
+        return data
+
+    def __extract_from_xml(self, connection_string) -> pd.DataFrame:
+        data = pd.read_xml(connection_string)
+        return data
+
+
 
 
     def __filter(self, data:pd.DataFrame, filters:dict) -> pd.DataFrame:
@@ -134,9 +166,18 @@ class ETL():
 
 
     # Not Finished
-    def __load_to_mssql(self, connection_string):
+    def __load_to_mssql(self, data, connection_string):
         mssql_engine = sqlalchemy.create_engine(f'mssql+pyodbc://{"server_name"}/{"mssql_db_name"}?trusted_connection=yes&driver=SQL+Server+Native+Client+11.0')
-        self.data.to_sql("table_name", mssql_engine, if_exists='append', index=False)
+        data.to_sql("table_name", mssql_engine, if_exists='append', index=False)
+
+    def __load_to_json(self, data, connection_string):
+        data.to_json(connection_string)
+
+    def __load_to_html(self, data, connection_string):
+        data.to_html(connection_string)
+
+    def __load_to_xml(self, data, connection_string):
+        data.to_xml(connection_string)
 
 
     @staticmethod
