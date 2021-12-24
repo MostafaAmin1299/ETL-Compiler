@@ -1,7 +1,5 @@
 import ply.yacc as yacc
 from lex import tokens
-from etl import ETL
-
 
 start = 'start'
 def p_start(p):
@@ -26,9 +24,10 @@ def p_error(p):
 
 def p_select(p):
     'select : SELECT distinct select_columns FROM DATASOURCE into where order limit SIMICOLON'
-    etl = ETL()
-    data = etl.extract(p[5])
-    data = etl.transform(
+    from etl import ETL
+
+    data = ETL.extract(p[5])
+    data = ETL.transform(
         data, 
         {
             "COLUMNS":  p[3],
@@ -38,63 +37,45 @@ def p_select(p):
             "LIMIT":    p[9],
         }
     )
-    etl.load(data, p[6])
+    ETL.load(data, p[6])
 
     p[0] = None
     
 
-
 ###########################
-#==== Yet INSERT STATEMENT 
+#==== INSERT STATEMENT ====
 ###########################
 
 def p_insert(p):
-    '''insert : INSERT INTO DATASOURCE icolumn VALUES LPAREN values RPAREN SIMICOLON
-              | INSERT INTO DATASOURCE LPAREN select RPAREN SIMICOLON'''
+    'insert : INSERT INTO DATASOURCE icolumn VALUES values SIMICOLON'
+    from etl import ETL
 
-    p[0] = f'''<INSERT STATEMENT>
-    VALUES: {p[5]}
-    LOAD DATASOURCE: {p[3]}
-
-    '''
+    ETL.insert_into(p[3], p[4], p[6])
+    p[0] = None
 
 
 
-##########################
-#========= Maths =========
-##########################
+###########################
+#==== Update STATEMENT ====
+###########################
+def p_update(p):
+    'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
+    from etl import ETL
+    
+    ETL.update(p[2], p[4], p[5])
+    p[0] = None
 
-def p_expression_plus(p):
-    'expression : expression PLUS term'
-    p[0] = p[1] + p[3]
 
-def p_expression_minus(p):
-    'expression : expression MINUS term'
-    p[0] = p[1] - p[3]
+###########################
+#==== YET DELETE STATEMENT​​ ====
+###########################
 
-def p_expression_term(p):
-    'expression : term'
-    p[0] = p[1]
+def p_delete(p):
+    'delete : DELETE FROM DATASOURCE where'
+    from etl import ETL
 
-def p_term_times(p):
-    'term : term TIMES factor'
-    p[0] = p[1] * p[3]
-
-def p_term_factor(p):
-    'term : factor'
-    p[0] = p[1]
-
-def p_factor_num(p):
-    'factor : NUMBER'
-    p[0] = p[1]
-
-def p_term_div(p):
-    'term : term DIVIDE factor'
-    p[0] = p[1] / p[3]
-
-def p_factor_expr(p):
-    'factor : LPAREN expression RPAREN'
-    p[0] = p[2]
+    ETL.delete(p[3], p[4])
+    p[0] = None
 
 
 
@@ -148,8 +129,7 @@ def p_conditions_not(p):
 
 def p_exp(p):
     '''exp : STRING
-           | COLNAME
-           | expression''' 
+           | COLNAME''' 
     p[0] = p[1]
 
 
@@ -246,7 +226,7 @@ def p_limit(p):
     if p[2] < 0:
         p[0] = None
     else:
-        p[0] = int(p[2])
+        p[0] = p[2]
 
 def p_limit_empty(p):
     'limit : empty'
@@ -254,48 +234,60 @@ def p_limit_empty(p):
 
 
 ###########################
-#====== YET INSERT VALUES​ =====
+#===== INSERT VALUES​ ======
 ###########################
 
 def p_value(p):
-    '''values : STRING
+    '''value : STRING
              | NUMBER'''
-    p[0] = [p[1]]
+    p[0] = p[1]
 
-def p_values(p):
-    'values : values COMMA values'
+def p_single_values(p):
+    'single_values : LPAREN value COMMA values RPAREN'
     p[0] = []
-    p[0] = p[0].extend(p[1])
+    p[0] = p[0].append(p[1])
     p[0] = p[0].extend(p[3])
 
+def p_values(p):
+    'values : single_values COMMA values'
+    p[0] = [p[1]].extend(p[3])
+
+def p_values_end(p):
+    'values : single_values'
+    p[0] = [p[1]]
+
+
+###########################
+#===== Insert Columns​​ =====
+###########################
+
 def p_icolumn(p):
-    '''icolumn : empty'''
-    pass
+    'icolumn : LPAREN columns RPAREN'
+    p[0] = p[2]
+
+
+def p_icolumn_empty(p):
+    'icolumn : empty'
+    p[0] = None
 
 
 
 ###########################
-#==== YET UPDATE STATEMENT​​ ====
+#==== ASSIGNS STATEMENT​​ ===
 ###########################
 
-def p_update(p):
-    'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
-    pass
+def p_assign(p):
+    'assign : column EQUAL value'
+    p[0] = (p[1], p[3])
 
 def p_assigns(p):
-    '''assigns : COLNAME EQUAL
-               | empty'''
-    pass
+    'assigns : assign COMMA assigns'
+    p[0] = [p[1]].extend(p[3])
 
+def p_assigns_end(p):
+    'assigns : assign'
+    p[0] = [p[1]]
 
-
-###########################
-#==== YET DELETE STATEMENT​​ ====
-###########################
-
-def p_delete(p):
-    'delete : DELETE FROM DATASOURCE where'
-    pass
 
 
 
@@ -304,9 +296,9 @@ parser = yacc.yacc()
 
 if __name__=='__main__':
     while True:
-        s = input('yacc> ')
+        s = input('query> ')
         if not s: break
         s = s.lower()
         result = parser.parse(s)
-        print(result)
+
     
