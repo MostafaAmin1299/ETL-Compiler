@@ -1,7 +1,6 @@
 from PyQt5 import QtWidgets
 from app.gui.ui import Ui_SQLCompiler
 import sys
-from app.compiler import parser
 
 app = QtWidgets.QApplication(sys.argv)
 MainWindow = QtWidgets.QMainWindow()

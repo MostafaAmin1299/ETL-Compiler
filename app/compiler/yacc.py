@@ -43,10 +43,10 @@ def p_select(p):
 
     p[5] = str(p[5]).replace("\\", "\\\\")
     p[0] = (
-        f"from app.etl import ETL\n"
+        f"from app import etl\n"
         f"\n"
-        f"data = ETL.extract('{p[5]}')\n"
-        f"data = ETL.transform(\n"
+        f"data = etl.extract('{p[5]}')\n"
+        f"data = etl.transform(\n"
         f"   data,\n"
         f"   {{\n"
         f"        'COLUMNS':  {p[3]},\n"
@@ -56,7 +56,7 @@ def p_select(p):
         f"        'LIMIT':    {p[9]},\n"
         f"    }}\n"
         f")\n"
-        f"ETL.load(data, {p[6]})\n"
+        f"etl.load(data, {p[6]})\n"
     )
     
 

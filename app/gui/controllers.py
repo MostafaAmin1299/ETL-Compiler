@@ -14,7 +14,7 @@ def execute():
     # try:
         code = str(ui.outputbox.toPlainText())
         exec(code)
-        from app import etl
-        ui.results.setText(str(etl.result))
+        from app.etl import core
+        ui.results.setText(str(core.result))
     # except Exception as e:
     #     print("Execution Error.", e)
