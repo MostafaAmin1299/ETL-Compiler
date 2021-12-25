@@ -1,4 +1,3 @@
-import ply.lex as lex
 from ply.lex import TOKEN
 
 # To handle reserved words
@@ -122,21 +121,3 @@ def t_error(t):
     print(f"Illegal entity {t.value}")
     t.lexer.skip(1)
 
-
-
-lexer = lex.lex()
-
-if __name__=='__main__':
-    while(True):
-        s = input("lex> ")
-        if not s:
-            break
-        s = s.lower() 
-        lexer.input(s)
-        print('=======Tokens=======')
-        while True:
-            tok = lexer.token()
-            if not tok:
-                break
-            print("\t", tok.value, "\t:\t", tok.type, sep="")
-        print('====================')

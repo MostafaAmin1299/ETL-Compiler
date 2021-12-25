@@ -1,5 +1,3 @@
-import ply.yacc as yacc
-from lex import tokens
 
 start = 'start'
 def p_start(p):
@@ -24,22 +22,42 @@ def p_error(p):
 
 def p_select(p):
     'select : SELECT distinct select_columns FROM DATASOURCE into where order limit SIMICOLON'
-    from etl import ETL
+    # from app.etl import ETL
 
-    data = ETL.extract(p[5])
-    data = ETL.transform(
-        data, 
-        {
-            "COLUMNS":  p[3],
-            "DISTINCT": p[2],
-            "FILTER":   p[7],
-            "ORDER":    p[8],
-            "LIMIT":    p[9],
-        }
+    # data = ETL.extract(p[5])
+    # data = ETL.transform(
+    #     data, 
+    #     {
+    #         "COLUMNS":  p[3],
+    #         "DISTINCT": p[2],
+    #         "FILTER":   p[7],
+    #         "ORDER":    p[8],
+    #         "LIMIT":    p[9],
+    #     }
+    # )
+    # ETL.load(data, p[6])
+
+    # for compiling
+    if type(p[3]) == str:
+        p[3] = "'" + p[3] + "'"
+
+    p[5] = str(p[5]).replace("\\", "\\\\")
+    p[0] = (
+        f"from app.etl import ETL\n"
+        f"\n"
+        f"data = ETL.extract('{p[5]}')\n"
+        f"data = ETL.transform(\n"
+        f"   data,\n"
+        f"   {{\n"
+        f"        'COLUMNS':  {p[3]},\n"
+        f"        'DISTINCT': {p[2]},\n"
+        f"        'FILTER':   {p[7]},\n"
+        f"        'ORDER':    {p[8]},\n"
+        f"        'LIMIT':    {p[9]},\n"
+        f"    }}\n"
+        f")\n"
+        f"ETL.load(data, {p[6]})\n"
     )
-    ETL.load(data, p[6])
-
-    p[0] = None
     
 
 ###########################
@@ -47,8 +65,8 @@ def p_select(p):
 ###########################
 
 def p_insert(p):
-    'insert : INSERT INTO DATASOURCE icolumn VALUES values SIMICOLON'
-    from etl import ETL
+    'insert : INSERT INTO DATASOURCE icolumn VALUES insert_values SIMICOLON'
+    from app.etl import ETL
 
     ETL.insert_into(p[3], p[4], p[6])
     p[0] = None
@@ -60,7 +78,7 @@ def p_insert(p):
 ###########################
 def p_update(p):
     'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
-    from etl import ETL
+    from app.etl import ETL
     
     ETL.update(p[2], p[4], p[5])
     p[0] = None
@@ -72,7 +90,7 @@ def p_update(p):
 
 def p_delete(p):
     'delete : DELETE FROM DATASOURCE where'
-    from etl import ETL
+    from app.etl import ETL
 
     ETL.delete(p[3], p[4])
     p[0] = None
@@ -242,18 +260,26 @@ def p_value(p):
              | NUMBER'''
     p[0] = p[1]
 
+def p_values(p):
+    'values : value COMMA values'
+    p[0] = [p[1]].extend(p[3])
+
+def p_values_end(p):
+    'values : value'
+    p[0] = [p[1]]
+
 def p_single_values(p):
-    'single_values : LPAREN value COMMA values RPAREN'
+    'single_values : LPAREN values RPAREN'
     p[0] = []
     p[0] = p[0].append(p[1])
     p[0] = p[0].extend(p[3])
 
-def p_values(p):
-    'values : single_values COMMA values'
+def p_insert_values(p):
+    'insert_values : single_values COMMA insert_values'
     p[0] = [p[1]].extend(p[3])
 
-def p_values_end(p):
-    'values : single_values'
+def p_insert_values_end(p):
+    'insert_values : single_values'
     p[0] = [p[1]]
 
 
@@ -287,18 +313,5 @@ def p_assigns(p):
 def p_assigns_end(p):
     'assigns : assign'
     p[0] = [p[1]]
-
-
-
-
-# Build the parser
-parser = yacc.yacc()
-
-if __name__=='__main__':
-    while True:
-        s = input('query> ')
-        if not s: break
-        s = s.lower()
-        result = parser.parse(s)
 
     
