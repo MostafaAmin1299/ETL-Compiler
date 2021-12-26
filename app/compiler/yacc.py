@@ -56,7 +56,7 @@ def p_select(p):
         f"        'LIMIT':    {p[9]},\n"
         f"    }}\n"
         f")\n"
-        f"etl.load(data, {p[6]})\n"
+        f"etl.load(data, '{p[6]}')\n"
     )
     
 
@@ -147,7 +147,8 @@ def p_conditions_not(p):
 
 def p_exp(p):
     '''exp : STRING
-           | COLNAME''' 
+           | COLNAME
+           | NUMBER''' 
     p[0] = p[1]
 
 
@@ -204,7 +205,7 @@ def p_select_columns(p):
 
 def p_into(p):
     'into : INTO DATASOURCE'
-    p[0] = p[2]
+    p[0] = str(p[2]).replace("\\", "\\\\")
 
 def p_into_empty(p):
     'into : empty'

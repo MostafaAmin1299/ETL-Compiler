@@ -2,7 +2,7 @@ import pandas as pd
 import sqlalchemy
 
 def __load_to_csv(data, csv_file_path):
-    data.to_csv(csv_file_path + ".csv", header=None, mode='a')
+    data.to_csv(csv_file_path , header=None, mode='a')
 
 
 def __load_to_sqlite(data, db_file_path, table_name):

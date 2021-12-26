@@ -57,23 +57,29 @@ def transform(data:pd.DataFrame, criteria:dict) -> pd.DataFrame:
 
 
 def load(data:pd.DataFrame, data_destination:str):
+    global result
     source_type = __get_source_type(data_destination)
     if source_type == 'CSV':
         __load_to_csv(data, data_destination)
+        result = 'Execution Done!'
     elif source_type == 'SQLITE':
         db_destination = data_destination.split('/')[0]
         table_name = data_destination.split('/')[1]
         __load_to_sqlite(data, db_destination, table_name)
+        result = 'Execution Done!'
     elif source_type == 'MSSQL':
         __load_to_mssql(data, data_destination)
+        result = 'Execution Done!'
     elif source_type == 'HTML':
         __load_to_html(data, data_destination)
+        result = 'Execution Done!'
     elif source_type == 'JSON':
         __load_to_json(data, data_destination)
+        result = 'Execution Done!'
     elif source_type == 'XML':
         __load_to_xml(data, data_destination)
+        result = 'Execution Done!'
     elif source_type == 'CONSOL':
-        global result
         result = data
         print(data)
     else:
