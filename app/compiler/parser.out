@@ -2,23 +2,11 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
-    AVG
-    BETWEEN
-    COUNT
     DIVIDE
-    EXISTS
-    GROUP
-    HAVING
-    IN
-    IS
-    MAX
-    MIN
     MINUS
-    NULL
     PATTERN
     PERCENT
     PLUS
-    SUM
 
 Grammar
 
@@ -83,38 +71,27 @@ Terminals, with rules where they appear
 
 AND                  : 19
 ASC                  : 39
-AVG                  : 
-BETWEEN              : 
 BIGGER               : 13
 BIGGER_EQUAL         : 12
 BY                   : 37
 COLNAME              : 25 30
 COLNUMBER            : 29
 COMMA                : 31 46 49 54
-COUNT                : 
 DATASOURCE           : 6 7 8 9 35
 DELETE               : 9
 DESC                 : 41
 DISTINCT             : 27
 DIVIDE               : 
 EQUAL                : 10 53
-EXISTS               : 
 FROM                 : 6 9
-GROUP                : 
-HAVING               : 
-IN                   : 
 INSERT               : 7
 INTO                 : 7 35
-IS                   : 
 LIKE                 : 21
 LIMIT                : 42
 LPAREN               : 18 48 51
-MAX                  : 
-MIN                  : 
 MINUS                : 
 NOT                  : 23
 NOTEQUAL             : 11
-NULL                 : 
 NUMBER               : 26 42 45
 OR                   : 20
 ORDER                : 37
@@ -128,7 +105,6 @@ SIMICOLON            : 6 7 8
 SMALLER              : 15
 SMALLER_EQUAL        : 14
 STRING               : 21 24 44
-SUM                  : 
 TIMES                : 33
 UPDATE               : 8
 VALUES               : 7
