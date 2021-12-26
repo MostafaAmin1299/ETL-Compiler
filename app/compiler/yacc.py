@@ -17,31 +17,17 @@ def p_error(p):
 
 
 ###########################
-#==== Yet SELECT STATEMENT​​ 
+#==== SELECT STATEMENT​​ ====
 ###########################
 
 def p_select(p):
     'select : SELECT distinct select_columns FROM DATASOURCE into where order limit SIMICOLON'
-    # from app.etl import ETL
 
-    # data = ETL.extract(p[5])
-    # data = ETL.transform(
-    #     data, 
-    #     {
-    #         "COLUMNS":  p[3],
-    #         "DISTINCT": p[2],
-    #         "FILTER":   p[7],
-    #         "ORDER":    p[8],
-    #         "LIMIT":    p[9],
-    #     }
-    # )
-    # ETL.load(data, p[6])
-
-    # for compiling
     if type(p[3]) == str:
         p[3] = "'" + p[3] + "'"
 
     p[5] = str(p[5]).replace("\\", "\\\\")
+    p[6] = str(p[6]).replace("\\", "\\\\")
     p[0] = (
         f"from app import etl\n"
         f"\n"
@@ -60,16 +46,24 @@ def p_select(p):
     )
     
 
+
 ###########################
 #==== INSERT STATEMENT ====
 ###########################
 
 def p_insert(p):
     'insert : INSERT INTO DATASOURCE icolumn VALUES insert_values SIMICOLON'
-    from app.etl import ETL
 
-    ETL.insert_into(p[3], p[4], p[6])
-    p[0] = None
+    p[3] = str(p[3]).replace("\\", "\\\\")
+    p[0] = (
+        f"from app import etl\n"
+        f"import pandas as pd\n"
+        f"\n"
+        f"values = {p[6]}\n"
+        f"data_destination = '{p[3]}'\n"
+        f"data = pd.DataFrame(values, columns={p[4]})\n"
+        f"etl.load(data, data_destination)\n"
+    )
 
 
 
@@ -78,21 +72,16 @@ def p_insert(p):
 ###########################
 def p_update(p):
     'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
-    from app.etl import ETL
-    
-    ETL.update(p[2], p[4], p[5])
     p[0] = None
 
 
+
 ###########################
-#==== YET DELETE STATEMENT​​ ====
+#==== DELETE STATEMENT​​ ====
 ###########################
 
 def p_delete(p):
     'delete : DELETE FROM DATASOURCE where'
-    from app.etl import ETL
-
-    ETL.delete(p[3], p[4])
     p[0] = None
 
 
@@ -205,11 +194,11 @@ def p_select_columns(p):
 
 def p_into(p):
     'into : INTO DATASOURCE'
-    p[0] = str(p[2]).replace("\\", "\\\\")
+    p[0] = p[2]
 
 def p_into_empty(p):
     'into : empty'
-    p[0] = None
+    p[0] = 'CONSOLE'
 
 
 
@@ -252,8 +241,9 @@ def p_limit_empty(p):
     p[0] = None
 
 
+
 ###########################
-#===== INSERT VALUES​ ======
+#========= VALUES​ =========
 ###########################
 
 def p_value(p):
@@ -262,8 +252,16 @@ def p_value(p):
     p[0] = p[1]
 
 def p_values(p):
-    'values : value COMMA values'
-    p[0] = [p[1]].extend(p[3])
+    'values : values COMMA values'
+    p[0] = []
+    p[0].extend(p[1])
+    p[0].extend(p[3])
+
+
+
+###########################
+#===== INSERT VALUES​ ======
+###########################
 
 def p_values_end(p):
     'values : value'
@@ -271,17 +269,18 @@ def p_values_end(p):
 
 def p_single_values(p):
     'single_values : LPAREN values RPAREN'
-    p[0] = []
-    p[0] = p[0].append(p[1])
-    p[0] = p[0].extend(p[3])
+    p[0] = p[2]
 
 def p_insert_values(p):
-    'insert_values : single_values COMMA insert_values'
-    p[0] = [p[1]].extend(p[3])
+    'insert_values : insert_values COMMA insert_values'
+    p[0] = []
+    p[0].extend(p[1])
+    p[0].extend(p[3])
 
 def p_insert_values_end(p):
     'insert_values : single_values'
     p[0] = [p[1]]
+
 
 
 ###########################

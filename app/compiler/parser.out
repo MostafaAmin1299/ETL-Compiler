@@ -68,10 +68,10 @@ Rule 42    limit -> LIMIT NUMBER
 Rule 43    limit -> empty
 Rule 44    value -> STRING
 Rule 45    value -> NUMBER
-Rule 46    values -> value COMMA values
+Rule 46    values -> values COMMA values
 Rule 47    values -> value
 Rule 48    single_values -> LPAREN values RPAREN
-Rule 49    insert_values -> single_values COMMA insert_values
+Rule 49    insert_values -> insert_values COMMA insert_values
 Rule 50    insert_values -> single_values
 Rule 51    icolumn -> LPAREN columns RPAREN
 Rule 52    icolumn -> empty
@@ -148,18 +148,18 @@ empty                : 17 28 36 38 40 43 52
 exp                  : 21 22 22
 icolumn              : 7
 insert               : 2
-insert_values        : 7 49
+insert_values        : 7 49 49
 into                 : 6
 limit                : 6
 logical              : 22
 order                : 6
 select               : 1
 select_columns       : 6
-single_values        : 49 50
+single_values        : 50
 start                : 0
 update               : 3
-value                : 46 47 53
-values               : 46 48
+value                : 47 53
+values               : 46 46 48
 way                  : 37
 where                : 6 8 9
 
@@ -567,7 +567,7 @@ state 37
 state 38
 
     (7) insert -> INSERT INTO DATASOURCE icolumn VALUES . insert_values SIMICOLON
-    (49) insert_values -> . single_values COMMA insert_values
+    (49) insert_values -> . insert_values COMMA insert_values
     (50) insert_values -> . single_values
     (48) single_values -> . LPAREN values RPAREN
 
@@ -793,23 +793,24 @@ state 52
 state 53
 
     (7) insert -> INSERT INTO DATASOURCE icolumn VALUES insert_values . SIMICOLON
+    (49) insert_values -> insert_values . COMMA insert_values
 
     SIMICOLON       shift and go to state 76
+    COMMA           shift and go to state 77
 
 
 state 54
 
-    (49) insert_values -> single_values . COMMA insert_values
     (50) insert_values -> single_values .
 
-    COMMA           shift and go to state 77
     SIMICOLON       reduce using rule 50 (insert_values -> single_values .)
+    COMMA           reduce using rule 50 (insert_values -> single_values .)
 
 
 state 55
 
     (48) single_values -> LPAREN . values RPAREN
-    (46) values -> . value COMMA values
+    (46) values -> . values COMMA values
     (47) values -> . value
     (44) value -> . STRING
     (45) value -> . NUMBER
@@ -1053,30 +1054,31 @@ state 76
 
 state 77
 
-    (49) insert_values -> single_values COMMA . insert_values
-    (49) insert_values -> . single_values COMMA insert_values
+    (49) insert_values -> insert_values COMMA . insert_values
+    (49) insert_values -> . insert_values COMMA insert_values
     (50) insert_values -> . single_values
     (48) single_values -> . LPAREN values RPAREN
 
     LPAREN          shift and go to state 55
 
-    single_values                  shift and go to state 54
     insert_values                  shift and go to state 88
+    single_values                  shift and go to state 54
 
 state 78
 
     (48) single_values -> LPAREN values . RPAREN
+    (46) values -> values . COMMA values
 
     RPAREN          shift and go to state 89
+    COMMA           shift and go to state 90
 
 
 state 79
 
-    (46) values -> value . COMMA values
     (47) values -> value .
 
-    COMMA           shift and go to state 90
     RPAREN          reduce using rule 47 (values -> value .)
+    COMMA           reduce using rule 47 (values -> value .)
 
 
 state 80
@@ -1188,23 +1190,28 @@ state 87
 
 state 88
 
-    (49) insert_values -> single_values COMMA insert_values .
+    (49) insert_values -> insert_values COMMA insert_values .
+    (49) insert_values -> insert_values . COMMA insert_values
 
-    SIMICOLON       reduce using rule 49 (insert_values -> single_values COMMA insert_values .)
+  ! shift/reduce conflict for COMMA resolved as shift
+    SIMICOLON       reduce using rule 49 (insert_values -> insert_values COMMA insert_values .)
+    COMMA           shift and go to state 77
+
+  ! COMMA           [ reduce using rule 49 (insert_values -> insert_values COMMA insert_values .) ]
 
 
 state 89
 
     (48) single_values -> LPAREN values RPAREN .
 
-    COMMA           reduce using rule 48 (single_values -> LPAREN values RPAREN .)
     SIMICOLON       reduce using rule 48 (single_values -> LPAREN values RPAREN .)
+    COMMA           reduce using rule 48 (single_values -> LPAREN values RPAREN .)
 
 
 state 90
 
-    (46) values -> value COMMA . values
-    (46) values -> . value COMMA values
+    (46) values -> values COMMA . values
+    (46) values -> . values COMMA values
     (47) values -> . value
     (44) value -> . STRING
     (45) value -> . NUMBER
@@ -1212,8 +1219,8 @@ state 90
     STRING          shift and go to state 60
     NUMBER          shift and go to state 61
 
-    value                          shift and go to state 79
     values                         shift and go to state 95
+    value                          shift and go to state 79
 
 state 91
 
@@ -1249,9 +1256,14 @@ state 94
 
 state 95
 
-    (46) values -> value COMMA values .
+    (46) values -> values COMMA values .
+    (46) values -> values . COMMA values
 
-    RPAREN          reduce using rule 46 (values -> value COMMA values .)
+  ! shift/reduce conflict for COMMA resolved as shift
+    RPAREN          reduce using rule 46 (values -> values COMMA values .)
+    COMMA           shift and go to state 90
+
+  ! COMMA           [ reduce using rule 46 (values -> values COMMA values .) ]
 
 
 state 96
@@ -1325,3 +1337,5 @@ WARNING: shift/reduce conflict for AND in state 80 resolved as shift
 WARNING: shift/reduce conflict for OR in state 80 resolved as shift
 WARNING: shift/reduce conflict for AND in state 81 resolved as shift
 WARNING: shift/reduce conflict for OR in state 81 resolved as shift
+WARNING: shift/reduce conflict for COMMA in state 88 resolved as shift
+WARNING: shift/reduce conflict for COMMA in state 95 resolved as shift

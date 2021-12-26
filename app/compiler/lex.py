@@ -7,25 +7,13 @@ reserved = {
     'into':     'INTO',
     'where':    'WHERE',
     'like':     'LIKE',
-    'group':    'GROUP',
-    'by':       'BY',
     'insert':   'INSERT',
-    'between':  'BETWEEN',
     'and':      'AND',
     'or':       'OR',
-    'in':       'IN',
-    'exists':   'EXISTS',
     'not':      'NOT', 
-    'is':       'IS',
-    'null':     'NULL',
     'distinct': 'DISTINCT',
-    'count':    'COUNT',
-    'max':      'MAX',
-    'min':      'MIN',
-    'sum':      'SUM',
-    'avg':      'AVG',
-    'having':   'HAVING',
     'order':    'ORDER',
+    'by':       'BY',
     'asc':      'ASC',
     'desc':     'DESC',
     'limit':    'LIMIT',
@@ -35,7 +23,6 @@ reserved = {
     'delete':   'DELETE'
 }
 
-# List of token names.   This is always required
 tokens = [
     'NUMBER',
     'PLUS',
@@ -81,20 +68,18 @@ t_COMMA     = r','
 t_ignore  = ' \t'  # Spaces and tabs
 t_ignore_COMMENT = r'/\*.*\*/' # Comment
 
-# To define tokens as a series of more complex regular expression rules.
 digit            = r'([0-9])'
 nondigit         = r'([_A-Za-z])'
 identifier       = r'(' + nondigit + r'(' + digit + r'|' + nondigit + r')*)'
 identifier       = identifier + r'|' + r'\[' + digit + r'+\]' 
+@TOKEN(identifier)
+def t_COLNAME(t):
+    t.type = reserved.get(t.value,'COLNAME')    # Check for reserved words
+    return t
 
 @TOKEN(r'"([^"\n])*"')
 def t_STRING(t):
     t.value = str(t.value)[1:-1]
-    return t
-
-@TOKEN(identifier)
-def t_COLNAME(t):
-    t.type = reserved.get(t.value,'COLNAME')    # Check for reserved words
     return t
 
 @TOKEN(r'\[\d+\]')

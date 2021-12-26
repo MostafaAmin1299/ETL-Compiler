@@ -3,7 +3,7 @@ import re
 
 
 def __get_source_type(data_source:str) -> str:
-    if data_source == None:
+    if data_source == 'CONSOLE':
         return 'CONSOL'
     elif re.search(r'.*\.csv(\.zip)?', data_source):   
         return 'CSV'
