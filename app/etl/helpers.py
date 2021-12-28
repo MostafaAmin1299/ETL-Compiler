@@ -9,7 +9,7 @@ def __get_source_type(data_source:str) -> str:
         return 'CSV'
     elif re.search(r'.*\.db/\w+', data_source):
         return 'SQLITE'
-    elif re.search(r'Data Source.*', data_source):
+    elif re.search(r'.*/.*/.*', data_source):
         return 'MSSQL'
     elif re.search(r'.*\.html', data_source):   
         return 'HTML'

@@ -50,5 +50,5 @@ class Utility:
         df['city'] = random.choices(cities, weights=[10, 2, 2, 1, 1, 1], k=num_rows)
         
         # Save the data into a zipped csv file
-        df.to_csv(csv_file_path + ".csv.zip", index_label='id', compression='zip')
+        df.to_csv(csv_file_path + ".csv", index_label='id')
     

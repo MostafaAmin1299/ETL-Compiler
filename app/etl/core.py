@@ -58,6 +58,8 @@ def transform(data:pd.DataFrame, criteria:dict) -> pd.DataFrame:
 
 def load(data:pd.DataFrame, data_destination:str):
     global result
+    result = data
+    
     source_type = __get_source_type(data_destination)
     if source_type == 'CSV':
         __load_to_csv(data, data_destination)
@@ -80,7 +82,6 @@ def load(data:pd.DataFrame, data_destination:str):
         __load_to_xml(data, data_destination)
         result = 'Execution Done!'
     elif source_type == 'CONSOL':
-        result = data
         print(data)
     else:
         raise Exception(f'Unsupported data destination')
