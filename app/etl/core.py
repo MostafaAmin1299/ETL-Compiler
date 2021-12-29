@@ -86,6 +86,6 @@ def load(data:pd.DataFrame, data_destination:str):
         result = 'Execution Done!'
     elif source_type == 'CONSOL':
         result = data
-        print(data)
+        # print(data)
     else:
         raise Exception(f'Unsupported data destination')

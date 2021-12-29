@@ -49,7 +49,7 @@ def __filter(data:pd.DataFrame, filters:dict) -> pd.DataFrame:
     elif filters["type"] == '<=':
         data = data[data[left] <= right]
     elif filters["type"] == '==':
-        data = data[data[left] == str(right).lower()]
+        data = data[data[left] == right]
     elif filters["type"] == '!=':
         data = data[data[left] != right]
 
