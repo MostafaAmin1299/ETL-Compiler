@@ -1,7 +1,7 @@
 import pandas as pd
-from app.etl.extract import __extract_from_csv, __extract_from_sqlite, __extract_from_mssql, __extract_from_html, __extract_from_json, __extract_from_xml
+from app.etl.extract import __extract_from_csv, __extract_from_sqlite, __extract_from_mssql, __extract_from_html, __extract_from_json, __extract_from_xml, __extract_from_excel
 from app.etl.helpers import __get_source_type, __filter
-from app.etl.load import __load_to_csv, __load_to_sqlite, __load_to_mssql, __load_to_html, __load_to_json, __load_to_xml
+from app.etl.load import __load_to_csv, __load_to_sqlite, __load_to_mssql, __load_to_html, __load_to_json, __load_to_xml, __load_to_excel
 
 
 result = None
@@ -23,6 +23,8 @@ def extract(data_source:str) -> pd.DataFrame:
         data = __extract_from_json(data_source)
     elif source_type == 'XML':
         data = __extract_from_xml(data_source)
+    elif source_type == 'EXCEL':
+        data = __extract_from_excel(data_source) 
     else:
         raise Exception(f'Unsupported data source')
     
@@ -58,8 +60,6 @@ def transform(data:pd.DataFrame, criteria:dict) -> pd.DataFrame:
 
 def load(data:pd.DataFrame, data_destination:str):
     global result
-    result = data
-    
     source_type = __get_source_type(data_destination)
     if source_type == 'CSV':
         __load_to_csv(data, data_destination)
@@ -81,7 +81,11 @@ def load(data:pd.DataFrame, data_destination:str):
     elif source_type == 'XML':
         __load_to_xml(data, data_destination)
         result = 'Execution Done!'
+    elif source_type == 'EXCEL':
+        __load_to_excel(data, data_destination)
+        result = 'Execution Done!'
     elif source_type == 'CONSOL':
+        result = data
         print(data)
     else:
         raise Exception(f'Unsupported data destination')
