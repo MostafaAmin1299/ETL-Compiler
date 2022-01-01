@@ -15,7 +15,7 @@ class Ui_SQLCompiler(object):
         self.centralwidget = QtWidgets.QWidget(SQLCompiler)
         self.centralwidget.setObjectName("centralwidget")
         self.inputbox = QtWidgets.QLineEdit(self.centralwidget)
-        self.inputbox.setGeometry(QtCore.QRect(40, 50, 591, 91))
+        self.inputbox.setGeometry(QtCore.QRect(40, 50, 1075, 91))
         self.inputbox.setStyleSheet(
                                 "width: 100%;\n"
                                 "color: black;\n"
@@ -29,6 +29,23 @@ class Ui_SQLCompiler(object):
         )
         self.inputbox.setText("")
         self.inputbox.setObjectName("inputbox")
+
+
+        self.listButton = QtWidgets.QComboBox(self.centralwidget)
+        self.listButton.addItems(["Pandas", "Petl ♥"])
+        self.listButton.setGeometry(QtCore.QRect(1120, 50, 161, 91))
+        self.listButton.setStyleSheet(
+            "width: 100%;\n"
+            "background-color: #4CAF50;\n"
+            "color: white;\n"
+            "padding: 14px 20px;\n"
+            "margin: 8px 0;\n"
+            "border: none;\n"
+            "border-radius: 4px;\n"
+            "font: 12pt Tahoma, Verdana, sans-serif;\n"
+        )
+
+
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(40, 20, 91, 31))
         self.label.setStyleSheet("font: 12pt Tahoma, Verdana, sans-serif;")
@@ -50,10 +67,14 @@ class Ui_SQLCompiler(object):
         self.outputbox.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.outputbox.setReadOnly(False)
         self.outputbox.setObjectName("outputbox")
+
+
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(40, 140, 91, 31))
         self.label_2.setStyleSheet("font: 12pt Tahoma, Verdana, sans-serif;")
         self.label_2.setObjectName("label_2")
+
+
         self.combilebtn = QtWidgets.QPushButton(self.centralwidget)
         self.combilebtn.setEnabled(True)
         self.combilebtn.setGeometry(QtCore.QRect(40, 760, 281, 61))
@@ -69,6 +90,8 @@ class Ui_SQLCompiler(object):
                                 "font: 12pt Tahoma, Verdana, sans-serif;\n"
         )
         self.combilebtn.setObjectName("combilebtn")
+
+
         self.excutebtn = QtWidgets.QPushButton(self.centralwidget)
         self.excutebtn.setEnabled(True)
         self.excutebtn.setGeometry(QtCore.QRect(360, 760, 281, 61))
@@ -84,12 +107,16 @@ class Ui_SQLCompiler(object):
                                 "font: 12pt Tahoma, Verdana, sans-serif;"
         )
         self.excutebtn.setObjectName("excutebtn")
+
+
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(680, 20, 91, 31))
+        self.label_3.setGeometry(QtCore.QRect(680, 140, 91, 31))
         self.label_3.setStyleSheet("font: 12pt Tahoma, Verdana, sans-serif;")
         self.label_3.setObjectName("label_3")
+
+
         self.results = QtWidgets.QTextEdit(self.centralwidget)
-        self.results.setGeometry(QtCore.QRect(680, 50, 601, 771))
+        self.results.setGeometry(QtCore.QRect(680, 170, 601, 650))
         self.results.setStyleSheet("color: black;\n"
                                 "padding: 14px 14px ;\n"
                                 "margin: 8px 0;\n"
@@ -101,6 +128,8 @@ class Ui_SQLCompiler(object):
         )
         self.results.setReadOnly(True)
         self.results.setObjectName("results")
+
+
         SQLCompiler.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(SQLCompiler)

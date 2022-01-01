@@ -48,3 +48,11 @@ def execute():
 
     except Exception as e:
         print("Execution Error.", e)
+
+
+def change_tool(i):
+    from app.compiler import yacc
+    if (i == 0):
+        yacc.tool = "Pandas"
+    else:
+        yacc.tool = "Petl"

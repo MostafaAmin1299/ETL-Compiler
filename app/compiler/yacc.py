@@ -1,4 +1,6 @@
 
+tool = "Pandas"
+
 start = 'start'
 def p_start(p):
     '''start : select 
@@ -28,22 +30,86 @@ def p_select(p):
 
     p[5] = str(p[5]).replace("\\", "\\\\")
     p[6] = str(p[6]).replace("\\", "\\\\")
-    p[0] = (
-        f"from app import etl\n"
-        f"\n"
-        f"data = etl.extract('{p[5]}')\n"
-        f"data = etl.transform(\n"
-        f"   data,\n"
-        f"   {{\n"
-        f"        'COLUMNS':  {p[3]},\n"
-        f"        'DISTINCT': {p[2]},\n"
-        f"        'FILTER':   {p[7]},\n"
-        f"        'ORDER':    {p[8]},\n"
-        f"        'LIMIT':    {p[9]},\n"
-        f"    }}\n"
-        f")\n"
-        f"etl.load(data, '{p[6]}')\n"
-    )
+    
+    if tool == "Pandas":
+        p[0] = (
+            f"from app import etl\n"
+            f"\n"
+            f"data = etl.extract('{p[5]}')\n"
+            f"data = etl.transform(\n"
+            f"   data,\n"
+            f"   {{\n"
+            f"        'COLUMNS':  {p[3]},\n"
+            f"        'DISTINCT': {p[2]},\n"
+            f"        'FILTER':   {p[7]},\n"
+            f"        'ORDER':    {p[8]},\n"
+            f"        'LIMIT':    {p[9]},\n"
+            f"    }}\n"
+            f")\n"
+            f"etl.load(data, '{p[6]}')\n"
+        )
+    elif tool == "Petl":
+        extract = ""
+        if ".csv" in p[5]:
+            extract = (
+                f"testFile = etl.fromcsv('{p[5]}')\n"
+            )
+        elif ".db" in p[5]:
+            extract = (
+                f"import sqlite3\n"
+                f"connection = sqlite3.connect('{p[5]}')\n"
+                f"testFile = etl.fromdb(connection, 'SELECT * FROM table1')\n"
+            )
+            
+        elif ".p" in p[5]:
+            extract = (
+                f"testFile = etl.frompickle('{p[5]}')\n"
+            )
+        elif ".json" in p[5]:
+            extract = (
+                f"testFile = etl.fromjson('{p[5]}')\n"
+            )
+        elif ".xml" in p[5]:
+            extract = (
+                f"testFile = etl.fromxml('{p[5]}', 'tr', 'td')\n"
+            )
+
+        load = ""
+        if p[6] == "CONSOLE":
+            load = (
+                f"print(testFile)\n"
+            )
+        elif ".csv" in p[6]:
+            load = (
+                f"etl.appendcsv(testFile, '{p[6]}')\n"
+            )
+        elif ".p" in p[6]:
+            load = (
+                f"etl.appendpickle(testFile, '{p[6]}')\n"
+            )
+        elif ".db" in p[6]:
+            load = (
+                f"import sqlite3\n"
+                f"connection = sqlite3.connect('{p[6]}')\n"
+                f"etl.appenddb(testFile, connection, 'table1')\n"
+            )
+        elif ".json" in p[6]:
+            load = (
+                f"etl.tojsonarrays(testFile, '{p[6]}')\n"
+                f"open('{p[6]}').read()\n"
+            )    
+        elif ".html" in p[6]:
+            load = (
+                f"etl.tohtml(testFile, '{p[6]}', caption='example Table HTML')\n"
+            ) 
+
+        p[0] = (
+            f"import petl as etl\n"
+            f"\n"
+            f"{extract}"
+            f"\n"
+            f"{load}"
+        )
     
 
 
