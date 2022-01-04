@@ -31,6 +31,7 @@ def p_select(p):
     p[5] = str(p[5]).replace("\\", "\\\\")
     p[6] = str(p[6]).replace("\\", "\\\\")
     
+    # check tool
     if tool == "Pandas":
         p[0] = (
             f"from app import etl\n"
