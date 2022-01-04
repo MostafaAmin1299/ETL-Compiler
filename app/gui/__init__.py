@@ -8,7 +8,8 @@ ui = Ui_SQLCompiler()
 ui.setupUi(MainWindow)
 
 # Connections
-from app.gui.controllers import compile, execute
+from app.gui.controllers import compile, execute, change_tool
 ui.combilebtn.clicked.connect(compile)
 ui.excutebtn.clicked.connect(execute)
+ui.listButton.currentIndexChanged.connect(change_tool)
 
