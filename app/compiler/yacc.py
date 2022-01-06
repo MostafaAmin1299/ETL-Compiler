@@ -1,36 +1,39 @@
-
 tool = "Pandas"
 
-start = 'start'
+start = "start"
+
+
 def p_start(p):
-    '''start : select 
-             | insert 
-             | update 
-             | delete'''
+    """start : select
+    | insert
+    | update
+    | delete"""
     p[0] = p[1]
 
+
 def p_empty(p):
-    'empty :'
+    "empty :"
     pass
+
 
 def p_error(p):
     print("Syntax error!")
 
 
+###########################
+# ==== SELECT STATEMENT​​ ====
+###########################
 
-###########################
-#==== SELECT STATEMENT​​ ====
-###########################
 
 def p_select(p):
-    'select : SELECT distinct select_columns FROM DATASOURCE into where order limit SIMICOLON'
+    "select : SELECT distinct select_columns FROM DATASOURCE into where order limit SIMICOLON"
 
     if type(p[3]) == str:
         p[3] = "'" + p[3] + "'"
 
     p[5] = str(p[5]).replace("\\", "\\\\")
     p[6] = str(p[6]).replace("\\", "\\\\")
-    
+
     # check tool
     if tool == "Pandas":
         p[0] = (
@@ -52,42 +55,32 @@ def p_select(p):
     elif tool == "Petl":
         extract = ""
         if ".csv" in p[5]:
-            extract = (
-                f"testFile = etl.fromcsv('{p[5]}')\n"
-            )
+            extract = f"testFile = etl.fromcsv('{p[5]}')\n"
         elif ".db" in p[5]:
             extract = (
                 f"import sqlite3\n"
                 f"connection = sqlite3.connect('{p[5]}')\n"
                 f"testFile = etl.fromdb(connection, 'SELECT * FROM table1')\n"
             )
-            
+
         elif ".p" in p[5]:
-            extract = (
-                f"testFile = etl.frompickle('{p[5]}')\n"
-            )
+            extract = f"testFile = etl.frompickle('{p[5]}')\n"
         elif ".json" in p[5]:
-            extract = (
-                f"testFile = etl.fromjson('{p[5]}')\n"
-            )
+            extract = f"testFile = etl.fromjson('{p[5]}')\n"
         elif ".xml" in p[5]:
-            extract = (
-                f"testFile = etl.fromxml('{p[5]}', 'tr', 'td')\n"
-            )
+            extract = f"testFile = etl.fromxml('{p[5]}', 'tr', 'td')\n"
+        elif ".html" in p[5]:
+            extract = f"testFile = open('{p[5]}').read() \n"
+        elif ".xlsx" in p[5]:
+            extract = f"testFile = etl.io.xlsx.fromxlsx('{p[5]}')\n"
 
         load = ""
         if p[6] == "CONSOLE":
-            load = (
-                f"print(testFile)\n"
-            )
+            load = f"print(testFile)\n"
         elif ".csv" in p[6]:
-            load = (
-                f"etl.appendcsv(testFile, '{p[6]}')\n"
-            )
+            load = f"etl.appendcsv(testFile, '{p[6]}')\n"
         elif ".p" in p[6]:
-            load = (
-                f"etl.appendpickle(testFile, '{p[6]}')\n"
-            )
+            load = f"etl.appendpickle(testFile, '{p[6]}')\n"
         elif ".db" in p[6]:
             load = (
                 f"import sqlite3\n"
@@ -95,31 +88,22 @@ def p_select(p):
                 f"etl.appenddb(testFile, connection, 'table1')\n"
             )
         elif ".json" in p[6]:
-            load = (
-                f"etl.tojsonarrays(testFile, '{p[6]}')\n"
-                f"open('{p[6]}').read()\n"
-            )    
+            load = f"etl.tojson(testFile, '{p[6]}')\n\n" f"open('{p[6]}').read()\n"
         elif ".html" in p[6]:
-            load = (
-                f"etl.tohtml(testFile, '{p[6]}', caption='example Table HTML')\n"
-            ) 
+            load = f"etl.tohtml(testFile, '{p[6]}', caption='example Table HTML')\n"
+        elif ".xlsx" in p[6]:
+            load = f"etl.io.xlsx.toxlsx(testFile,'{p[6]}', sheet=None, write_header=True, mode='replace')\n"
 
-        p[0] = (
-            f"import petl as etl\n"
-            f"\n"
-            f"{extract}"
-            f"\n"
-            f"{load}"
-        )
-    
+        p[0] = f"import petl as etl\n" f"\n" f"{extract}" f"\n" f"{load}"
 
 
 ###########################
-#==== INSERT STATEMENT ====
+# ==== INSERT STATEMENT ====
 ###########################
+
 
 def p_insert(p):
-    'insert : INSERT INTO DATASOURCE icolumn VALUES insert_values SIMICOLON'
+    "insert : INSERT INTO DATASOURCE icolumn VALUES insert_values SIMICOLON"
 
     p[3] = str(p[3]).replace("\\", "\\\\")
     p[0] = (
@@ -133,252 +117,269 @@ def p_insert(p):
     )
 
 
-
 ###########################
-#==== Update STATEMENT ====
+# ==== Update STATEMENT ====
 ###########################
 def p_update(p):
-    'update : UPDATE DATASOURCE SET assigns where SIMICOLON'
+    "update : UPDATE DATASOURCE SET assigns where SIMICOLON"
     p[0] = None
 
 
+###########################
+# ==== DELETE STATEMENT​​ ====
+###########################
 
-###########################
-#==== DELETE STATEMENT​​ ====
-###########################
 
 def p_delete(p):
-    'delete : DELETE FROM DATASOURCE where'
+    "delete : DELETE FROM DATASOURCE where"
     p[0] = None
 
 
+##########################
+# ====== COMPARISON =======
+##########################
 
-##########################
-#====== COMPARISON =======
-##########################
 
 def p_logical(p):
-    '''logical :  EQUAL 
-                | NOTEQUAL 
-                | BIGGER_EQUAL 
-                | BIGGER 
-                | SMALLER_EQUAL 
-                | SMALLER'''
+    """logical :  EQUAL
+    | NOTEQUAL
+    | BIGGER_EQUAL
+    | BIGGER
+    | SMALLER_EQUAL
+    | SMALLER"""
     p[0] = p[1]
 
 
+##########################
+# ====== WHERE CLAUSE =====
+##########################
 
-##########################
-#====== WHERE CLAUSE =====
-##########################
 
 def p_where(p):
-    'where : WHERE conditions'         
+    "where : WHERE conditions"
     p[0] = p[2]
+
 
 def p_where_empty(p):
-    'where : empty'
+    "where : empty"
     p[0] = None
 
+
 def p_cond_parens(p):
-    'conditions : LPAREN conditions RPAREN'
+    "conditions : LPAREN conditions RPAREN"
     p[0] = p[2]
 
+
 def p_cond_3(p):
-    '''conditions : conditions AND conditions 
-                  | conditions OR conditions
-                  | exp LIKE STRING
-                  | exp logical exp'''
-    p[0] = {'type': p[2], 'left': p[1], 'right': p[3]}
+    """conditions : conditions AND conditions
+    | conditions OR conditions
+    | exp LIKE STRING
+    | exp logical exp"""
+    p[0] = {"type": p[2], "left": p[1], "right": p[3]}
+
 
 def p_conditions_not(p):
-    'conditions : NOT conditions'
+    "conditions : NOT conditions"
     p[0] = {p[1]: p[2]}
 
 
+##########################
+# ========== EXP ==========
+##########################
 
-##########################
-#========== EXP ==========
-##########################
 
 def p_exp(p):
-    '''exp : STRING
-           | COLNAME
-           | NUMBER''' 
+    """exp : STRING
+    | COLNAME
+    | NUMBER"""
     p[0] = p[1]
 
 
+###########################
+# ======== Distinct ========
+###########################
 
-###########################
-#======== Distinct ========
-###########################
 
 def p_distinct(p):
-    '''distinct : DISTINCT'''
+    """distinct : DISTINCT"""
     p[0] = True
 
+
 def p_distinct_empty(p):
-    '''distinct : empty'''
+    """distinct : empty"""
     p[0] = False
 
 
 ###########################
-#======== COLUMNS =========
+# ======== COLUMNS =========
 ###########################
 def p_column(p):
-    '''column : COLNUMBER
-               | COLNAME'''
+    """column : COLNUMBER
+    | COLNAME"""
     p[0] = p[1]
 
+
 def p_columns(p):
-    '''columns : columns COMMA columns'''
+    """columns : columns COMMA columns"""
     p[0] = []
     p[0].extend(p[1])
     p[0].extend(p[3])
 
+
 def p_columns_base(p):
-    '''columns : column'''
+    """columns : column"""
     p[0] = [p[1]]
 
 
 ###########################
-#===== SELECT COLUMNS​​ =====
+# ===== SELECT COLUMNS​​ =====
 ###########################
 
+
 def p_select_columns_all(p):
-    'select_columns : TIMES'
-    p[0] = '__all__'
+    "select_columns : TIMES"
+    p[0] = "__all__"
+
 
 def p_select_columns(p):
-    'select_columns : columns'
+    "select_columns : columns"
     p[0] = p[1]
 
 
+###########################
+# ========= Into ===========
+###########################
 
-###########################
-#========= Into ===========
-###########################
 
 def p_into(p):
-    'into : INTO DATASOURCE'
+    "into : INTO DATASOURCE"
     p[0] = p[2]
 
+
 def p_into_empty(p):
-    'into : empty'
-    p[0] = 'CONSOLE'
-
+    "into : empty"
+    p[0] = "CONSOLE"
 
 
 ###########################
-#======= Order by =========
+# ======= Order by =========
 ###########################
+
 
 def p_order_by(p):
-    '''order : ORDER BY column way'''
+    """order : ORDER BY column way"""
     p[0] = (p[3], p[4])
 
+
 def p_order_empty(p):
-    'order : empty'
+    "order : empty"
     p[0] = None
 
+
 def p_way_asc(p):
-    '''way : ASC 
-           | empty'''
-    p[0] = 'ASC'
+    """way : ASC
+    | empty"""
+    p[0] = "ASC"
+
 
 def p_way_desc(p):
-    'way : DESC'
-    p[0] = 'DESC'
-
+    "way : DESC"
+    p[0] = "DESC"
 
 
 ###########################
-#========= Limit ==========
+# ========= Limit ==========
 ###########################
+
 
 def p_limit(p):
-    '''limit : LIMIT NUMBER'''
+    """limit : LIMIT NUMBER"""
     if p[2] < 0:
         p[0] = None
     else:
         p[0] = p[2]
 
+
 def p_limit_empty(p):
-    'limit : empty'
+    "limit : empty"
     p[0] = None
 
 
+###########################
+# ========= VALUES​ =========
+###########################
 
-###########################
-#========= VALUES​ =========
-###########################
 
 def p_value(p):
-    '''value : STRING
-             | NUMBER'''
+    """value : STRING
+    | NUMBER"""
     p[0] = p[1]
 
+
 def p_values(p):
-    'values : values COMMA values'
+    "values : values COMMA values"
     p[0] = []
     p[0].extend(p[1])
     p[0].extend(p[3])
 
 
+###########################
+# ===== INSERT VALUES​ ======
+###########################
 
-###########################
-#===== INSERT VALUES​ ======
-###########################
 
 def p_values_end(p):
-    'values : value'
+    "values : value"
     p[0] = [p[1]]
 
+
 def p_single_values(p):
-    'single_values : LPAREN values RPAREN'
+    "single_values : LPAREN values RPAREN"
     p[0] = p[2]
 
+
 def p_insert_values(p):
-    'insert_values : insert_values COMMA insert_values'
+    "insert_values : insert_values COMMA insert_values"
     p[0] = []
     p[0].extend(p[1])
     p[0].extend(p[3])
 
+
 def p_insert_values_end(p):
-    'insert_values : single_values'
+    "insert_values : single_values"
     p[0] = [p[1]]
 
 
+###########################
+# ===== Insert Columns​​ =====
+###########################
 
-###########################
-#===== Insert Columns​​ =====
-###########################
 
 def p_icolumn(p):
-    'icolumn : LPAREN columns RPAREN'
+    "icolumn : LPAREN columns RPAREN"
     p[0] = p[2]
 
 
 def p_icolumn_empty(p):
-    'icolumn : empty'
+    "icolumn : empty"
     p[0] = None
 
 
+###########################
+# ==== ASSIGNS STATEMENT​​ ===
+###########################
 
-###########################
-#==== ASSIGNS STATEMENT​​ ===
-###########################
 
 def p_assign(p):
-    'assign : column EQUAL value'
+    "assign : column EQUAL value"
     p[0] = (p[1], p[3])
 
+
 def p_assigns(p):
-    'assigns : assign COMMA assigns'
+    "assigns : assign COMMA assigns"
     p[0] = [p[1]].extend(p[3])
 
-def p_assigns_end(p):
-    'assigns : assign'
-    p[0] = [p[1]]
 
-    
+def p_assigns_end(p):
+    "assigns : assign"
+    p[0] = [p[1]]
