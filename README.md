@@ -1,5 +1,5 @@
 # SQL Compiler
----------------------
+----------------------
 > A compiler with a good GUI that can not only scan, parse and compile SQL-like statements into python code but also excutes the code.
 
 The need for this tool arises as nowadays we have lots of data source types, So e thought it'll be beneficial to make an easy-to-use tool that acts as an interface between the user and their data which lies on different file formats and databases.
